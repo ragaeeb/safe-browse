@@ -72,32 +72,27 @@ Sheet
                 ListItemComponent
                 {
                     type: "failed_login"
-                    StandardListItem {
+                    LogListItem {
                         imageSource: "images/ic_password.png";
                         title: qsTr("Failed Login") + Retranslate.onLanguageChanged
                         description: qsTr("Attempted login with '%1'").arg(ListItemData.comment)
-                        status: ListItem.view.localization.renderStandardTime(ListItemData.timestamp);
                     }
                 },
                 
                 ListItemComponent
                 {
                     type: "requested"
-                    StandardListItem {
+                    LogListItem {
                         imageSource: "images/ic_browse.png";
                         title: qsTr("Requested") + Retranslate.onLanguageChanged
-                        description: ListItemData.comment
-                        status: ListItem.view.localization.renderStandardTime(ListItemData.timestamp);
                     }
                 },
 
                 ListItemComponent {
                     type: "blocked"
-                    StandardListItem {
+                    LogListItem {
                         imageSource: "images/ic_block.png"
                         title: qsTr("Blocked") + Retranslate.onLanguageChanged
-                        description: ListItemData.comment
-                        status: ListItem.view.localization.renderStandardTime(ListItemData.timestamp)
                     }
                 }
             ]
@@ -111,6 +106,7 @@ Sheet
                     id: allFilter
                     text: qsTr("All") + Retranslate.onLanguageChanged
                     description: qsTr("Show All Activity") + Retranslate.onLanguageChanged
+                    imageSource: "images/ic_logs_all.png"
                     selected: true
                 }
                 
@@ -118,6 +114,7 @@ Sheet
                     id: loginFilter
                     text: qsTr("Authentication") + Retranslate.onLanguageChanged
                     description: qsTr("Show Only Login Activity") + Retranslate.onLanguageChanged
+                    imageSource: "images/ic_logs_authentication.png"
                     value: "failed_login"
                 }
                 
@@ -125,7 +122,16 @@ Sheet
                     id: browsingFilter
                     text: qsTr("Browsing") + Retranslate.onLanguageChanged
                     description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
+                    imageSource: "images/ic_logs_browse.png"
                     value: "requested"
+                }
+                
+                Option {
+                    id: blockedFilter
+                    text: qsTr("Blocked") + Retranslate.onLanguageChanged
+                    description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
+                    imageSource: "images/ic_logs_blocked.png"
+                    value: "blocked"
                 }
                 
                 onSelectedOptionChanged:
