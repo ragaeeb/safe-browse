@@ -212,10 +212,6 @@ Make sure you remember it!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cleared all log!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Attempted login with &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -225,6 +221,10 @@ Make sure you remember it!</source>
     </message>
     <message>
         <source>Blocked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cleared log!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
