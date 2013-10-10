@@ -27,6 +27,7 @@ Page
             verticalAlignment: VerticalAlignment.Fill
             horizontalAlignment: HorizontalAlignment.Fill
             visible: !security.authenticated
+            topPadding: 10
             
             TextField {
                 id: passwordField
@@ -154,7 +155,7 @@ Page
                                 StandardListItem {
                                     id: rootItem
                                     imageSource: "images/ic_browse.png";
-                                    description: "http://"+ListItemData.uri
+                                    description: ListItemData.uri
                                     
                                     contextActions: [
                                         ActionSet {
@@ -170,6 +171,34 @@ Page
                                             }
                                         }
                                     ]
+                                    
+                                    animations: [
+                                        ParallelAnimation
+                                        {
+                                            id: showAnim
+                                            ScaleTransition
+                                            {
+                                                fromX: 0.8
+                                                toX: 1
+                                                fromY: 0.8
+                                                toY: 1
+                                                duration: 800
+                                                easingCurve: StockCurve.ElasticOut
+                                            }
+                                            
+                                            FadeTransition {
+                                                fromOpacity: 0
+                                                toOpacity: 1
+                                                duration: 200
+                                            }
+                                            
+                                            delay: rootItem.ListItem.indexInSection * 100
+                                        }
+                                    ]
+                                    
+                                    onCreationCompleted: {
+                                        showAnim.play();
+                                    }
                                 }
                             }
                         ]
