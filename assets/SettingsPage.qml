@@ -2,11 +2,22 @@ import bb.cascades 1.0
 import bb.system 1.0
 import QtQuick 1.0
 
-BasePage {
+Page
+{
     id: dashPage
     
-    contentContainer: Container
+    titleBar: SafeTitleBar {}
+    
+    Container
     {
+        attachedObjects: [
+            ImagePaintDefinition {
+                id: back
+                imageSource: "images/background.png"
+            }
+        ]
+        
+        background: back.imagePaint
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
         leftPadding: 20; rightPadding: 20;

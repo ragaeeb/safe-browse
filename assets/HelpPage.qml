@@ -1,7 +1,7 @@
 import bb.cascades 1.0
 import bb 1.0
 
-BasePage
+Page
 {
     attachedObjects: [
         ApplicationInfo {
@@ -37,10 +37,20 @@ BasePage
         property variant navPane: navigationPane
         id: properties
     }
+    
+    titleBar: SafeTitleBar {}
 
-    contentContainer: Container
+    Container
     {
         leftPadding: 20; rightPadding: 20;
+        background: back.imagePaint
+        
+        attachedObjects: [
+            ImagePaintDefinition {
+                id: back
+                imageSource: "images/background.png"
+            }
+        ]
 
         horizontalAlignment: HorizontalAlignment.Center
         verticalAlignment: VerticalAlignment.Fill

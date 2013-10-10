@@ -11,6 +11,10 @@ NavigationPane
         }
     ]
     
+    Menu.definition: CanadaIncMenu {
+        projectName: "safe-browse"
+    }
+    
     onPopTransitionEnded: {
         page.destroy();
     }
@@ -23,41 +27,6 @@ NavigationPane
             
             settingsAction.triggered();
             helpAction.triggered();
-        }
-    }
-    
-    Menu.definition: MenuDefinition
-    {
-        settingsAction: SettingsActionItem
-        {
-            id: settingsAction
-            property Page settingsPage
-            
-            onTriggered:
-            {
-                if (!settingsPage) {
-                    definition.source = "SettingsPage.qml"
-                    settingsPage = definition.createObject()
-                }
-                
-                navigationPane.push(settingsPage);
-            }
-        }
-        
-        helpAction: HelpActionItem
-        {
-            id: helpAction
-            property Page helpPage
-            
-            onTriggered:
-            {
-                if (!helpPage) {
-                    definition.source = "HelpPage.qml"
-                    helpPage = definition.createObject();
-                }
-                
-                navigationPane.push(helpPage);
-            }
         }
     }
     
@@ -231,7 +200,7 @@ NavigationPane
                     ]
                 }
             }
-            
+
             ProgressIndicator {
                 id: progressIndicator
                 horizontalAlignment: HorizontalAlignment.Center

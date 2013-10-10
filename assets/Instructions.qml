@@ -1,6 +1,7 @@
 import bb.cascades 1.0
 
-BasePage {
+Page
+{
     actions: [
         ActionItem {
             title: qsTr("Open") + Retranslate.onLanguageChanged
@@ -12,8 +13,10 @@ BasePage {
             }
         }
     ]
-
-    contentContainer: ListView
+    
+    titleBar: SafeTitleBar {}
+    
+    ListView
     {
         id: listView
 
@@ -34,7 +37,7 @@ BasePage {
                 {
                     topPadding: 10; bottomPadding: 20
                     horizontalAlignment: HorizontalAlignment.Fill
-                    verticalAlignment: HorizontalAlignment.Fill
+                    verticalAlignment: VerticalAlignment.Fill
 
                     ImageView {
                         imageSource: ListItemData.imageSource
