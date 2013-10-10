@@ -130,32 +130,17 @@ NavigationPane
                     onUrlChanged: {
                         var urlValue = url.toString();
                         
-                        if ( urlValue.indexOf("http") == 0 )
+                        if ( urlValue.indexOf("http") == 0 || urlValue.indexOf("https") == 0 )
                         {
-                            var request = uriUtil.removeProtocol(urlValue); // http://a.m.google.com/abc.html -> a.m.google.com/abc.html
-                            var slashIndex = request.indexOf("/");
-
-                            if (slashIndex != -1) {
-                                request = request.substring(0, slashIndex); // a.m.google.com
-                            }
-
-                            var lastDotIndex = request.lastIndexOf(".");
-                            var subRequest = request.substring(0, lastDotIndex); // a.m.google
-
-                            var secondLastDotIndex = subRequest.lastIndexOf(".");
-
-                            if (secondLastDotIndex != -1) {
-                                var lastToken = subRequest.substring(secondLastDotIndex + 1); // google
-                                request = lastToken + request.substring(lastDotIndex);
-                            }
+							var slashslash = urlValue.indexOf("//") + 2;
+							var domain = urlValue.substring( slashslash, urlValue.indexOf("/", slashslash) );
 
                             var mode = persist.getValueFor("mode");
                             sql.query = "SELECT * FROM %1 WHERE uri=? LIMIT 1".arg(mode);
-                            var params = [ request ];
+                            var params = [domain];
                             sql.executePrepared(params, 20);
 
                             sql.query = "INSERT INTO logs (action,comment) VALUES ('%1',?)".arg("requested");
-                            params = [ request ];
                             sql.executePrepared(params, 40);
                         }
                     }
@@ -180,10 +165,11 @@ NavigationPane
                             var mode = persist.getValueFor("mode");
                             
                             if ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) {
-                                html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked website!</body></html>"
+                            	var uri = url.toString();
+                                html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
                                 
                                 sql.query = "INSERT INTO logs (action,comment) VALUES ('%1',?)".arg("blocked");
-                                sql.executePrepared( [ url.toString() ], 50 );
+                                sql.executePrepared( [uri], 50 );
                             }
                         }
                     }
