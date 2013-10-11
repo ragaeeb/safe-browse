@@ -7,6 +7,8 @@
 #include "LocaleUtil.h"
 #include "Persistance.h"
 
+#include <bb/system/InvokeManager>
+
 namespace bb {
 	namespace cascades {
 		class Application;
@@ -26,13 +28,19 @@ class ApplicationUI : public QObject
 	LazySceneCover m_sceneCover;
 	Persistance m_persistance;
 	CustomSqlDataSource m_sql;
+	bb::system::InvokeManager m_invokeManager;
 
     ApplicationUI(bb::cascades::Application *app);
+
+private slots:
+    void invoked(bb::system::InvokeRequest const& request);
 
 public:
 	static void create(bb::cascades::Application* app);
     virtual ~ApplicationUI();
     Q_INVOKABLE void invokeSettingsApp();
+    Q_INVOKABLE void analyze(QString const& domain);
+    Q_INVOKABLE void logBlocked(QString const& uri);
 };
 
 } // salat

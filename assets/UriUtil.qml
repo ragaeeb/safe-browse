@@ -4,6 +4,7 @@ QtObject
 {
     function removeProtocol(request)
     {
+        request = request.replace(/^\s+|\s+$/g, "");
         request = request.toLowerCase();
         
         if ( request.indexOf("http://") == 0 ) {

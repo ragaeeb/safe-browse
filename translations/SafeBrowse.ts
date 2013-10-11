@@ -2,6 +2,51 @@
 <!DOCTYPE TS>
 <TS version="2.0">
 <context>
+    <name>AuthenticationContainer</name>
+    <message>
+        <source>Login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wrong password entered. Please try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>BrowsingModeDropDown</name>
+    <message>
+        <source>Browsing Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allow all sites except certain ones</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Controlled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Block all sites except certain ones</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>EntriesListView</name>
+    <message>
+        <source>Safe Browse</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>HelpPage</name>
     <message>
         <source>Parental Control</source>
@@ -40,34 +85,6 @@ There is a lot of great and educational content on the web. However, there is al
 <context>
     <name>SettingsPage</name>
     <message>
-        <source>Login</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Browsing Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Passive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Allow all sites except certain ones</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Controlled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Safe Browse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Change Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -96,10 +113,6 @@ There is a lot of great and educational content on the web. However, there is al
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Wrong password entered. Please try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -109,10 +122,6 @@ There is a lot of great and educational content on the web. However, there is al
     </message>
     <message>
         <source>Successfully set homepage to %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Block all sites except certain ones</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
