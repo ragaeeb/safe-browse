@@ -1,11 +1,11 @@
 import bb.cascades 1.0
 import bb.system 1.0
-import QtQuick 1.0
+import com.canadainc.data 1.0
 
 Page
 {
     id: dashPage
-    
+    actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     titleBar: SafeTitleBar {}
     
     Container
@@ -22,58 +22,7 @@ Page
         horizontalAlignment: HorizontalAlignment.Fill
         leftPadding: 20; rightPadding: 20;
         
-        Container
-        {
-            verticalAlignment: VerticalAlignment.Fill
-            horizontalAlignment: HorizontalAlignment.Fill
-            visible: !security.authenticated
-            topPadding: 10
-            
-            TextField {
-                id: passwordField
-                
-                inputMode: TextFieldInputMode.Password
-                horizontalAlignment: HorizontalAlignment.Fill
-                verticalAlignment: VerticalAlignment.Center
-                
-                input.submitKey: SubmitKey.Submit
-                
-                input.onSubmitted: {
-                    loginButton.clicked();
-                }
-            }
-            
-            Button {
-                id: loginButton
-                text: qsTr("Login") + Retranslate.onLanguageChanged
-                horizontalAlignment: HorizontalAlignment.Center
-                
-                onClicked: {
-                    var loggedIn = security.login(passwordField.text);
-                    
-                    if (!loggedIn) {
-                        sql.query = "INSERT INTO logs (action,comment) VALUES ('%1',?)".arg("failed_login");
-                        var params = [passwordField.text];
-                        sql.executePrepared(params, 10);
-                        
-                        persist.showToast( qsTr("Wrong password entered. Please try again.") );
-                        passwordField.resetText();
-                    }
-                }
-            }
-            
-            attachedObjects: [
-                Timer {
-                    running: true
-                    interval: 250
-                    repeat: false
-                    
-                    onTriggered: {
-                        passwordField.requestFocus();
-                    }
-                }
-            ]
-        }
+        AuthenticationContainer {}
         
         ControlDelegate
         {
@@ -93,48 +42,15 @@ Page
                     function reload()
                     {
                         sql.query = "SELECT uri FROM %1".arg(modeDropDown.selectedValue);
-                        sql.load(4);
+                        sql.load(QueryId.GetAll);
                     }
                     
-                    DropDown {
+                    BrowsingModeDropDown
+                    {
                         id: modeDropDown
-                        title: qsTr("Browsing Mode") + Retranslate.onLanguageChanged
-                        
-                        Option {
-                            text: qsTr("Passive") + Retranslate.onLanguageChanged
-                            description: qsTr("Allow all sites except certain ones") + Retranslate.onLanguageChanged
-                            value: "passive"
-                        }
-                        
-                        Option {
-                            text: qsTr("Controlled") + Retranslate.onLanguageChanged
-                            description: qsTr("Block all sites except certain ones") + Retranslate.onLanguageChanged
-                            value: "controlled"
-                        }
-                        
-                        onCreationCompleted: {
-                            var mode = persist.getValueFor("mode")
-                            
-                            for (var i = 0; i < options.length; i ++) {
-                                if (options[i].value == mode) {
-                                    options[i].selected = true
-                                    break;
-                                }
-                            }
-                        }
                         
                         onSelectedValueChanged: {
-                            var changed = persist.saveValueFor("mode", selectedValue);
                             mainContainer.reload();
-                            
-                            if (changed)
-                            {
-                                if (selectedValue == "passive") {
-                                    persist.showToast("All websites will be allowed except the ones you choose to block.") + Retranslate.onLanguageChanged
-                                } else if (selectedValue == "controlled") {
-                                    persist.showToast("All websites will be blocked except the ones you choose to allow.") + Retranslate.onLanguageChanged
-                                }
-                            }
                         }
                     }
                     
@@ -142,87 +58,7 @@ Page
                         topMargin: 0; bottomMargin: 0
                     }
                     
-                    ListView
-                    {
-                        dataModel: ArrayDataModel {
-                            id: adm
-                        }
-                        
-                        listItemComponents:
-                        [
-                            ListItemComponent
-                            {
-                                StandardListItem {
-                                    id: rootItem
-                                    imageSource: "images/ic_browse.png";
-                                    description: ListItemData.uri
-                                    
-                                    contextActions: [
-                                        ActionSet {
-                                            title: qsTr("Safe Browse") + Retranslate.onLanguageChanged;
-                                            subtitle: rootItem.description;
-                                            
-                                            DeleteActionItem {
-                                                title: qsTr("Remove") + Retranslate.onLanguageChanged
-                                                
-                                                onTriggered: {
-                                                    rootItem.ListItem.view.remove(ListItemData);
-                                                }
-                                            }
-                                        }
-                                    ]
-                                    
-                                    animations: [
-                                        ParallelAnimation
-                                        {
-                                            id: showAnim
-                                            ScaleTransition
-                                            {
-                                                fromX: 0.8
-                                                toX: 1
-                                                fromY: 0.8
-                                                toY: 1
-                                                duration: 800
-                                                easingCurve: StockCurve.ElasticOut
-                                            }
-                                            
-                                            FadeTransition {
-                                                fromOpacity: 0
-                                                toOpacity: 1
-                                                duration: 200
-                                            }
-                                            
-                                            delay: rootItem.ListItem.indexInSection * 100
-                                        }
-                                    ]
-                                    
-                                    onCreationCompleted: {
-                                        showAnim.play();
-                                    }
-                                }
-                            }
-                        ]
-                        
-                        function remove(ListItemData) {
-                            sql.query = "DELETE FROM %1 WHERE uri=?".arg(modeDropDown.selectedValue);
-                            var params = [ListItemData.uri];
-                            sql.executePrepared(params, 3);
-                            
-                            mainContainer.reload();
-                        }
-                        
-                        function onDataLoaded(id, data)
-                        {
-                            if (id == 4) {
-                                adm.clear()
-                                adm.append(data);
-                            }
-                        }
-                        
-                        onCreationCompleted: {
-                            sql.dataLoaded.connect(onDataLoaded);
-                        }
-                    }
+                    EntriesListView {}
                     
                     onCreationCompleted: {
                         var changePassword = actionDefinition.createObject();
@@ -266,13 +102,11 @@ Page
                             onFinished: {
                                 if (result == SystemUiResult.ConfirmButtonSelection) {
                                     var request = inputFieldTextEntry();
-                                    request = request.replace(/^\s+|\s+$/g, "");
-                                    
                                     request = uriUtil.removeProtocol(request);
                                     
                                     sql.query = "INSERT INTO %1 (uri) VALUES (?)".arg(modeDropDown.selectedValue);
                                     var params = [request];
-                                    sql.executePrepared(params, 5);
+                                    sql.executePrepared(params, QueryId.InsertEntry);
                                     
                                     mainContainer.reload();
                                 }
@@ -295,11 +129,7 @@ Page
                             onFinished: {
                                 if (result == SystemUiResult.ConfirmButtonSelection) {
                                     var request = inputFieldTextEntry();
-                                    request = request.replace(/^\s+|\s+$/g, "");
-
-                                    if ( request.indexOf("http://") != 0 ) {
-									    request = "http://"+request;
-                                    }
+                                    request = uriUtil.removeProtocol(request);
 
                                     persist.saveValueFor("home", request);
                                     persist.showToast( qsTr("Successfully set homepage to %1").arg(request) );

@@ -1,5 +1,6 @@
 import bb.cascades 1.0
 import bb.system 1.0
+import com.canadainc.data 1.0
 
 Sheet
 {
@@ -7,6 +8,8 @@ Sheet
     
     Page
     {
+        actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
+        
         titleBar: TitleBar
         {
             title: qsTr("View Logs") + Retranslate.onLanguageChanged
@@ -39,7 +42,7 @@ Sheet
                         onFinished: {
                             if (result == SystemUiResult.ConfirmButtonSelection) {
                                 sql.query = "DELETE from logs";
-                                sql.load(2);
+                                sql.load(QueryId.ClearLogs);
                                 listView.reload();
                                 
                                 persist.showToast( qsTr("Cleared log!") );
@@ -144,13 +147,13 @@ Sheet
                         sql.query = "SELECT * from logs";
                     }
                     
-                    sql.load(1);
+                    sql.load(QueryId.GetLogs);
                 }
             }
             
             function onDataLoaded(id, data)
             {
-                if (id == 1) {
+                if (id == QueryId.GetLogs) {
                     adm.clear()
                     adm.append(data);
                 }

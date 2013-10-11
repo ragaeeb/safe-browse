@@ -1,9 +1,11 @@
 import bb.cascades 1.0
 import bb.system 1.0
+import com.canadainc.data 1.0
 
 NavigationPane
 {
     id: navigationPane
+    property alias target: detailsView.url
     
     attachedObjects: [
         ComponentDefinition {
@@ -32,6 +34,8 @@ NavigationPane
     
     Page
     {
+		actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
+    
         actions: [
             ActionItem {
                 title: qsTr("Back") + Retranslate.onLanguageChanged
@@ -94,7 +98,11 @@ NavigationPane
                 imageSource: "images/ic_refresh.png"
 
                 onTriggered: {
-                    detailsView.reload();
+                	if (target == "local:///") {
+                		detailsView.url = detailsView.requested;
+                	} else {
+                    	detailsView.reload();
+                	}
                 }
             }
         ]
@@ -118,6 +126,7 @@ NavigationPane
                 WebView
                 {
                     id: detailsView
+                    property variant requested
                     settings.zoomToFitEnabled: true
                     settings.activeTextEnabled: true
                     horizontalAlignment: HorizontalAlignment.Fill
@@ -134,14 +143,9 @@ NavigationPane
                         {
 							var slashslash = urlValue.indexOf("//") + 2;
 							var domain = urlValue.substring( slashslash, urlValue.indexOf("/", slashslash) );
-
-                            var mode = persist.getValueFor("mode");
-                            sql.query = "SELECT * FROM %1 WHERE uri=? LIMIT 1".arg(mode);
-                            var params = [domain];
-                            sql.executePrepared(params, 20);
-
-                            sql.query = "INSERT INTO logs (action,comment) VALUES ('%1',?)".arg("requested");
-                            sql.executePrepared(params, 40);
+							
+							requested = url;
+							app.analyze(domain);
                         }
                     }
                     
@@ -161,29 +165,21 @@ NavigationPane
                     
                     function onDataLoaded(id, data)
                     {
-                        if (id == 20) {
+                        if (id == QueryId.LookupDomain) {
                             var mode = persist.getValueFor("mode");
                             
                             if ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) {
                             	var uri = url.toString();
                                 html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
                                 
-                                sql.query = "INSERT INTO logs (action,comment) VALUES ('%1',?)".arg("blocked");
-                                sql.executePrepared( [uri], 50 );
+                                app.logBlocked(uri);
                             }
                         }
                     }
                     
                     onCreationCompleted: {
-                        url = persist.getValueFor("home");
                         sql.dataLoaded.connect(onDataLoaded);
                     }
-                    
-                    attachedObjects: [
-                        UriUtil {
-                            id: uriUtil
-                        }
-                    ]
                 }
             }
 
