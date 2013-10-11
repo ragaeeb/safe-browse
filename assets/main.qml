@@ -141,8 +141,8 @@ NavigationPane
                         
                         if ( urlValue.indexOf("http") == 0 || urlValue.indexOf("https") == 0 )
                         {
-							var slashslash = urlValue.indexOf("//") + 2;
-							var domain = urlValue.substring( slashslash, urlValue.indexOf("/", slashslash) );
+                        	urlValue = uriUtil.removeProtocol(urlValue);
+							var domain = urlValue.substring( 0, urlValue.indexOf("/") );
 							
 							requested = url;
 							app.analyze(domain);
@@ -176,10 +176,16 @@ NavigationPane
                             }
                         }
                     }
-                    
+
                     onCreationCompleted: {
                         sql.dataLoaded.connect(onDataLoaded);
                     }
+                    
+                    attachedObjects: [
+                    	UriUtil {
+                    		id: uriUtil
+                    	}
+                    ]
                 }
             }
 
