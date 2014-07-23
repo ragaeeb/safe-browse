@@ -39,6 +39,7 @@ public:
 	static void create(bb::cascades::Application* app);
     virtual ~ApplicationUI();
     Q_INVOKABLE void invokeSettingsApp();
+    Q_INVOKABLE void invokeAdobeReader(QUrl const& uri);
     Q_INVOKABLE void analyze(QString const& domain);
     Q_INVOKABLE void logBlocked(QString const& uri);
 };

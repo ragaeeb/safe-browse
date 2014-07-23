@@ -1,6 +1,7 @@
 #include "precompiled.h"
 
 #include "applicationui.hpp"
+#include "IOUtils.h"
 #include "Logger.h"
 #include "QueryId.h"
 
@@ -13,7 +14,7 @@ using namespace canadainc;
 ApplicationUI::ApplicationUI(bb::cascades::Application *app) : QObject(app), m_account(&m_persistance), m_sceneCover("Cover.qml")
 {
 	INIT_SETTING("mode", "passive");
-	INIT_SETTING("home", "http://abdurrahman.org");
+	INIT_SETTING("home", "http://canadainc.org");
 
 	QString database = QString("%1/database.db").arg( QDir::homePath() );
 	m_sql.setSource(database);
@@ -42,7 +43,6 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app) : QObject(app), m_a
 	{
 		case ApplicationStartupMode::InvokeApplication:
 		case ApplicationStartupMode::InvokeCard:
-			LOGGER("INVOKED!!");
 			break;
 
 		default:
@@ -53,13 +53,14 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app) : QObject(app), m_a
 	}
 
 	connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
+	connect( &m_network, SIGNAL( requestComplete(QVariant const&, QByteArray const&) ), this, SLOT( requestComplete(QVariant const&, QByteArray const&) ) );
 }
 
 
 void ApplicationUI::invoked(bb::system::InvokeRequest const& request)
 {
 	QUrl uri = request.uri();
-	LOGGER("========= INVOKED WITH" << uri );
+	LOGGER("========= INVOKED WITH" << uri << uri.fragment() << "**" << uri.authority() << "host" << uri.host() << "path" << uri.path() << "scheme" << uri.scheme() << "tld" << uri.topLevelDomain() << "userinfo" << uri.userInfo() );
 
 	Application::instance()->scene()->setProperty("target", uri);
 }
@@ -84,17 +85,29 @@ void ApplicationUI::logBlocked(QString const& uri)
 }
 
 
+void ApplicationUI::invokeAdobeReader(QUrl const& uri)
+{
+    LOGGER(uri);
+
+    bb::system::InvokeRequest request;
+    request.setTarget("com.rim.bb.app.adobeReader");
+    request.setAction("bb.action.OPEN");
+    request.setMimeType("application/pdf");
+    request.setUri(uri);
+
+    m_invokeManager.invoke(request);
+}
+
+
 void ApplicationUI::invokeSettingsApp()
 {
-	bb::system::InvokeManager invokeManager;
-
 	bb::system::InvokeRequest request;
 	request.setTarget("sys.settings.target");
 	request.setAction("bb.action.OPEN");
 	request.setMimeType("settings/view");
 	request.setUri( QUrl("settings://childprotection") );
 
-	invokeManager.invoke(request);
+	m_invokeManager.invoke(request);
 }
 
 
