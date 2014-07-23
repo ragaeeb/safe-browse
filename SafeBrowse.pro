@@ -3,6 +3,7 @@ APP_NAME = SafeBrowse
 INCLUDEPATH += ../src ../../canadainc/src/
 CONFIG += qt warn_on cascades10
 LIBS += -lbbsystem -lbbdata -lbbutilityi18n
+QT += network
 
 CONFIG(release, debug|release) {
     DESTDIR = o.le-v7
