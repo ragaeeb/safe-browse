@@ -5,6 +5,14 @@ TabbedPane
     id: root
     activeTab: browseTab
     showTabsOnActionBar: false
+    property variant target
+    
+    onTargetChanged: {
+        console.log("*** ZZKJ", target);
+        activePane.target = target;
+        console.log("*** ZZKJ2", target);
+        //activePane.target = target;
+    }
     
     Menu.definition: CanadaIncMenu
     {
@@ -82,19 +90,29 @@ TabbedPane
         }
     }
     
+    function onClosed()
+    {
+        console.log("*** CLOSED");
+    }
+    
     function onReady()
     {
-        if ( !security.accountCreated() ) {
+        if ( !security.accountCreated() )
+        {
             definition.source = "SignupSheet.qml";
             var sheet = definition.createObject();
+            sheet.closed.connect(onClosed);
             sheet.open();
-            
-            settingsAction.triggered();
-            helpAction.triggered();
         }
     }
     
     onCreationCompleted: {
         app.initialize.connect(onReady);
     }
+    
+    attachedObjects: [
+        ComponentDefinition {
+            id: definition
+        }
+    ]
 }

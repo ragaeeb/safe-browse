@@ -13,6 +13,45 @@
     </message>
 </context>
 <context>
+    <name>BrowserPane</name>
+    <message>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the URL you want to browse.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close Tab</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BrowsingModeDropDown</name>
     <message>
         <source>Browsing Mode</source>
@@ -126,39 +165,6 @@ There is a lot of great and educational content on the web. However, there is al
     </message>
 </context>
 <context>
-    <name>SignupSheet</name>
-    <message>
-        <source>Change Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Passwords do not match!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Password must be at least 3 characters minimum!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Successfully set password!
-
-Make sure you remember it!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ViewLogsSheet</name>
     <message>
         <source>Clear Logs</source>
@@ -244,31 +250,19 @@ Make sure you remember it!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter URL</source>
+        <source>Surf the web</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter the URL you want to browse.</source>
+        <source>New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>OK</source>
+        <source>New Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Back</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Forward</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Refresh</source>
+        <source>Tab %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

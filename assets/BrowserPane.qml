@@ -9,6 +9,10 @@ NavigationPane
     property bool showClose: false
     signal closeTab();
     
+    onTargetChanged: {
+        console.log("*** TARGET CHANGED TO", target);
+    }
+    
     function promptForAddress() {
         prompt.show();
     }
@@ -177,7 +181,7 @@ NavigationPane
                     }
                     
                     onCreationCompleted: {
-                        sql.dataLoaded.connect(onDataLoaded);
+                        helper.dataLoaded.connect(onDataLoaded);
                     }
                     
                     attachedObjects: [

@@ -20,7 +20,9 @@ public:
     	InsertBlocked,
     	LogBlocked,
     	LogRequest,
-    	LookupDomain
+    	LookupDomain,
+    	Setup,
+    	SettingUp,
     };
 };
 
