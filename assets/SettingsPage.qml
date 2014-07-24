@@ -8,8 +8,125 @@ Page
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     titleBar: SafeTitleBar {}
     
+    function showSheet(sheetSource)
+    {
+        definition.source = sheetSource;
+        var sheet = definition.createObject();
+        sheet.open();
+    }
+    
+    onCreationCompleted: {
+        loginPrompt.show();
+    }
+    
+    actions: [
+        ActionItem
+        {
+            id: addAction
+            imageSource: "images/ic_add.png"
+            title: qsTr("Add") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onTriggered: {
+                console.log("UserEvent: AddSiteTriggered");
+                addPrompt.show();
+            }
+            
+            attachedObjects: [
+                SystemPrompt
+                {
+                    id: addPrompt
+                    title: qsTr("Enter URL") + Retranslate.onLanguageChanged
+                    body: qsTr("Enter the host address (ie: youtube.com). Don't append any http:// or www.") + Retranslate.onLanguageChanged
+                    confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
+                    cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
+                    inputField.emptyText: "youtube.com"
+                    
+                    onFinished: {
+                        if (result == SystemUiResult.ConfirmButtonSelection)
+                        {
+                            var request = inputFieldTextEntry();
+                            request = uriUtil.removeProtocol(request);
+                            
+                            helper.blockSite(listView, modeDropDown.selectedValue, request);
+                        }
+                    }
+                }
+            ]
+        },
+        
+        ActionItem
+        {
+            imageSource: "images/ic_home.png"
+            title: qsTr("Set Home") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onTriggered: {
+                console.log("UserEvent: SetHomeTriggered");
+                homePrompt.showPrompt();
+            }
+            
+            attachedObjects: [
+                SystemPrompt
+                {
+                    id: homePrompt
+                    title: qsTr("Enter URL") + Retranslate.onLanguageChanged
+                    body: qsTr("Enter the homepage address (ie: http://learnaboutislam.co.uk)") + Retranslate.onLanguageChanged
+                    confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
+                    cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
+                    inputField.emptyText: "http://canadainc.org"
+                    inputOptions: SystemUiInputOption.None
+                    
+                    function showPrompt() {
+                        inputField.defaultText = persist.getValueFor("home");
+                        show();
+                    }
+                    
+                    onFinished: {
+                        if (result == SystemUiResult.ConfirmButtonSelection)
+                        {
+                            var request = inputFieldTextEntry();
+                            
+                            if ( request.indexOf("http://") != 0 ) {
+                                request = "http://"+request;
+                            }
+                            
+                            persist.saveValueFor("home", request);
+                            persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "", "asset:///images/ic_home.png" );
+                        }
+                    }
+                }
+            ]
+        },
+        
+        ActionItem
+        {
+            imageSource: "images/ic_password.png"
+            title: qsTr("Change Password") + Retranslate.onLanguageChanged
+            
+            onTriggered: {
+                console.log("UserEvent: ChangePasswordTriggered");
+                dashPage.showSheet("SignupSheet.qml");
+            }
+        },
+        
+        ActionItem
+        {
+            imageSource: "images/ic_logs.png"
+            title: qsTr("View Logs") + Retranslate.onLanguageChanged
+            
+            onTriggered: {
+                console.log("UserEvent: ViewLogsTriggered");
+                dashPage.showSheet("ViewLogsSheet.qml");
+            }
+        }
+    ]
+    
     Container
     {
+        id: guardianContainer
+        opacity: 0
+        
         attachedObjects: [
             ImagePaintDefinition {
                 id: back
@@ -20,153 +137,180 @@ Page
         background: back.imagePaint
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
-        leftPadding: 20; rightPadding: 20;
+        leftPadding: 10; rightPadding: 10;
         
-        AuthenticationContainer {}
-        
-        ControlDelegate
+        PersistDropDown
         {
-            id: secretDelegate
-            verticalAlignment: VerticalAlignment.Fill
-            horizontalAlignment: HorizontalAlignment.Fill
-            delegateActive: security.authenticated
+            id: modeDropDown
+            key: "mode"
+            title: qsTr("Browsing Mode") + Retranslate.onLanguageChanged
             
-            sourceComponent: ComponentDefinition
-            {
-                Container
+            Option {
+                text: qsTr("Passive") + Retranslate.onLanguageChanged
+                description: qsTr("Allow all sites except certain ones") + Retranslate.onLanguageChanged
+                value: "passive"
+                imageSource: "images/ic_passive.png"
+            }
+            
+            Option {
+                text: qsTr("Controlled") + Retranslate.onLanguageChanged
+                description: qsTr("Block all sites except certain ones") + Retranslate.onLanguageChanged
+                value: "controlled"
+                imageSource: "images/ic_controlled.png"
+            }
+            
+            onValueChanged: {
+                if (diff)
                 {
-                    id: mainContainer
-                    verticalAlignment: VerticalAlignment.Fill
-                    horizontalAlignment: HorizontalAlignment.Fill
-                    
-                    function reload()
+                    if (selectedValue == "passive") {
+                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "", "asset:///images/ic_passive.png" );
+                    } else if (selectedValue == "controlled") {
+                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "", "asset:///images/ic_controlled.png" );
+                    }
+                }
+                
+                helper.fetchAllBlocked(listView, selectedValue);
+            }
+        }
+        
+        Divider {
+            topMargin: 0; bottomMargin: 0
+        }
+        
+        EmptyDelegate
+        {
+            id: noElements
+            graphic: "images/placeholder/blocked_empty.png"
+            labelText: qsTr("There are no websites currently blocked. Tap here to add one.") + Retranslate.onLanguageChanged
+            
+            onImageTapped: {
+                addAction.triggered();
+            }
+        }
+        
+        ListView
+        {
+            id: listView
+            
+            dataModel: ArrayDataModel {
+                id: adm
+            }
+            
+            listItemComponents:
+            [
+                ListItemComponent
+                {
+                    StandardListItem
                     {
-                        sql.query = "SELECT uri FROM %1".arg(modeDropDown.selectedValue);
-                        sql.load(QueryId.GetAll);
-                    }
-                    
-                    BrowsingModeDropDown
-                    {
-                        id: modeDropDown
+                        id: rootItem
+                        imageSource: "images/ic_browse.png";
+                        description: ListItemData.uri
                         
-                        onSelectedValueChanged: {
-                            mainContainer.reload();
-                        }
-                    }
-                    
-                    Divider {
-                        topMargin: 0; bottomMargin: 0
-                    }
-                    
-                    EntriesListView {}
-                    
-                    onCreationCompleted: {
-                        var changePassword = actionDefinition.createObject();
-                        changePassword.title = qsTr("Change Password") + Retranslate.onLanguageChanged;
-                        changePassword.imageSource = "images/ic_password.png";
-                        changePassword.triggered.connect( function showPasswordSheet() {
-                            dashPage.showSheet("SignupSheet.qml");
-                        });
-                        dashPage.addAction(changePassword, ActionBarPlacement.InOverflow);
-                        
-                        var viewLogs = actionDefinition.createObject();
-                        viewLogs.title = qsTr("View Logs") + Retranslate.onLanguageChanged;
-                        viewLogs.imageSource = "images/ic_logs.png";
-                        viewLogs.triggered.connect( function showPasswordSheet() {
-                            dashPage.showSheet("ViewLogsSheet.qml");
-                        });
-                        dashPage.addAction(viewLogs, ActionBarPlacement.InOverflow);
-                        
-                        var addSite = actionDefinition.createObject();
-                        addSite.title = qsTr("Add") + Retranslate.onLanguageChanged;
-                        addSite.imageSource = "images/ic_add.png";
-                        addSite.triggered.connect(prompt.show);
-                        dashPage.addAction(addSite, ActionBarPlacement.OnBar);
-
-                        var setHome = actionDefinition.createObject();
-                        setHome.title = qsTr("Set Home") + Retranslate.onLanguageChanged;
-                        setHome.imageSource = "images/ic_home.png";
-                        setHome.triggered.connect(homePrompt.showPrompt);
-                        dashPage.addAction(setHome, ActionBarPlacement.OnBar);
-                    }
-                    
-                    attachedObjects: [
-                        SystemPrompt {
-                            id: prompt
-                            title: qsTr("Enter URL") + Retranslate.onLanguageChanged
-                            body: qsTr("Enter the host address (ie: youtube.com). Don't append any http:// or www.") + Retranslate.onLanguageChanged
-                            confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
-                            cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
-                            inputField.emptyText: "youtube.com"
-                            
-                            onFinished: {
-                                if (result == SystemUiResult.ConfirmButtonSelection) {
-                                    var request = inputFieldTextEntry();
-                                    request = uriUtil.removeProtocol(request);
+                        contextActions: [
+                            ActionSet {
+                                title: qsTr("Safe Browse") + Retranslate.onLanguageChanged;
+                                subtitle: rootItem.description;
+                                
+                                DeleteActionItem {
+                                    title: qsTr("Remove") + Retranslate.onLanguageChanged
                                     
-                                    sql.query = "INSERT INTO %1 (uri) VALUES (?)".arg(modeDropDown.selectedValue);
-                                    var params = [request];
-                                    sql.executePrepared(params, QueryId.InsertEntry);
-                                    
-                                    mainContainer.reload();
-                                }
-                            }
-                        },
-
-                        SystemPrompt
-                        {
-                            id: homePrompt
-                            title: qsTr("Enter URL") + Retranslate.onLanguageChanged
-                            body: qsTr("Enter the homepage address (ie: http://abdurrahman.org)") + Retranslate.onLanguageChanged
-                            confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
-                            cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
-                            inputField.emptyText: "http://canadainc.org"
-                            inputOptions: SystemUiInputOption.None
-                            
-                            function showPrompt() {
-                                inputField.defaultText = persist.getValueFor("home");
-                                show();
-                            }
-
-                            onFinished: {
-                                if (result == SystemUiResult.ConfirmButtonSelection)
-                                {
-                                    var request = inputFieldTextEntry();
-                                    
-                                    if ( request.indexOf("http://") != 0 ) {
-                                        request = "http://"+request;
+                                    onTriggered: {
+                                        console.log("UserEvent: RemoveBlockedSite");
+                                        rootItem.ListItem.view.remove(ListItemData);
                                     }
-                                    
-                                    persist.saveValueFor("home", request);
-                                    persist.showToast( qsTr("Successfully set homepage to %1").arg(request) );
                                 }
                             }
-                        },
-
-                        UriUtil {
-                            id: uriUtil
+                        ]
+                        
+                        ListItem.onInitializedChanged: {
+                            if (initialized) {
+                                showAnim.play();
+                            }
                         }
-                    ]
+                        
+                        animations: [
+                            ParallelAnimation
+                            {
+                                id: showAnim
+                                ScaleTransition
+                                {
+                                    fromX: 0.8
+                                    toX: 1
+                                    fromY: 0.8
+                                    toY: 1
+                                    duration: 800
+                                    easingCurve: StockCurve.ElasticOut
+                                }
+                                
+                                FadeTransition {
+                                    fromOpacity: 0
+                                    toOpacity: 1
+                                    duration: 200
+                                }
+                                
+                                delay: rootItem.ListItem.indexInSection * 100
+                            }
+                        ]
+                    }
+                }
+            ]
+            
+            function remove(ListItemData) {
+                helper.unblockSite(modeDropDown.selectedValue, ListItemData.uri);
+            }
+            
+            function onDataLoaded(id, data)
+            {
+                if (id == QueryId.GetAll)
+                {
+                    adm.clear()
+                    adm.append(data);
+                    
+                    listView.visible = !adm.isEmpty();
+                    noElements.delegateActive = !listView.visible;
+                } else if (id == QueryId.InsertEntry) {
+                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
+                } else if (id == QueryId.DeleteEntry) {
+                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
                 }
             }
         }
     }
     
-    function showSheet(sheetSource)
-    {
-        definition.source = sheetSource;
-        var sheet = definition.createObject();
-        sheet.open();
-    }
-    
     attachedObjects: [
-        ComponentDefinition {
-            id: definition
+        SystemPrompt
+        {
+            id: loginPrompt
+            body: qsTr("Please enter your password:") + Retranslate.onLanguageChanged
+            title: qsTr("Login") + Retranslate.onLanguageChanged
+            inputOptions: SystemUiInputOption.None
+            inputField.emptyText: qsTr("Password cannot be empty...") + Retranslate.onLanguageChanged
+            inputField.maximumLength: 20
+            inputField.inputMode: SystemUiInputMode.Password
+            
+            onFinished: {
+                if (value == SystemUiResult.ConfirmButtonSelection)
+                {
+                    var password = inputFieldTextEntry().trim();
+                    var loggedIn = security.login(password);
+                    
+                    if (!loggedIn)
+                    {
+                        helper.logFailedLogin(listView, password);
+                        persist.showToast( qsTr("Wrong password entered. Please try again."), "", "asset:///images/dropdown/set_password.png" );
+                        dashPage.parent.pop();
+                    } else {
+                        guardianContainer.opacity = 1;
+                    }
+                } else {
+                    dashPage.removeAllActions();
+                    dashPage.parent.pop();
+                }
+            }
         },
-        
-        ComponentDefinition {
-            id: actionDefinition
-            ActionItem {}
+
+        UriUtil {
+            id: uriUtil
         }
     ]
 }
