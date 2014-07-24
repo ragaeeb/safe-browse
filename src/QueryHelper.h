@@ -33,7 +33,11 @@ public:
 
     bool initDatabase();
     Q_INVOKABLE void analyze(QString const& domain);
+    Q_INVOKABLE void blockSite(QObject* caller, QString const& mode, QString const& uri);
+    Q_INVOKABLE void fetchAllBlocked(QObject* caller, QString const& mode);
     Q_INVOKABLE void logBlocked(QString const& uri);
+    Q_INVOKABLE void logFailedLogin(QObject* caller, QString const& inputPassword);
+    Q_INVOKABLE void unblockSite(QObject* caller, QString const& mode, QString const& uri);
     static bool databaseReady();
 };
 

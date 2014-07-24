@@ -17,7 +17,11 @@ TabbedPane
     Menu.definition: CanadaIncMenu
     {
         id: menuDef
+        help.imageSource: "images/menu/ic_help.png"
+        help.title: qsTr("Help") + Retranslate.onLanguageChanged
         projectName: "safe-browse"
+        settings.imageSource: "images/menu/ic_settings.png"
+        settings.title: qsTr("Settings") + Retranslate.onLanguageChanged
         showSubmitLogs: true
     }
     

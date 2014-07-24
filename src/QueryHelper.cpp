@@ -50,6 +50,34 @@ void QueryHelper::logBlocked(QString const& uri)
 }
 
 
+void QueryHelper::logFailedLogin(QObject* caller, QString const& inputPassword)
+{
+    LOGGER(inputPassword);
+    m_sql.executeQuery(caller, "INSERT INTO logs (action,comment) VALUES ('failed_login',?)", QueryId::LogFailedLogin, QVariantList() << inputPassword);
+}
+
+
+void QueryHelper::blockSite(QObject* caller, QString const& mode, QString const& uri)
+{
+    LOGGER(mode << uri);
+    m_sql.executeQuery(caller, QString("INSERT INTO %1 (uri) VALUES (?)").arg(mode), QueryId::InsertEntry, QVariantList() << uri);
+}
+
+
+void QueryHelper::fetchAllBlocked(QObject* caller, QString const& mode)
+{
+    LOGGER(mode);
+    m_sql.executeQuery( caller, QString("SELECT uri FROM %1").arg(mode), QueryId::GetAll );
+}
+
+
+void QueryHelper::unblockSite(QObject* caller, QString const& mode, QString const& uri)
+{
+    LOGGER(mode << uri);
+    m_sql.executeQuery(caller, QString("DELETE FROM %1 WHERE uri=?").arg(mode), QueryId::DeleteEntry, QVariantList() << uri);
+}
+
+
 bool QueryHelper::initDatabase()
 {
     if ( !databaseReady() )

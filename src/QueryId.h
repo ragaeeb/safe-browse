@@ -19,6 +19,7 @@ public:
     	GetLogs,
     	InsertBlocked,
     	LogBlocked,
+        LogFailedLogin,
     	LogRequest,
     	LookupDomain,
     	Setup,
