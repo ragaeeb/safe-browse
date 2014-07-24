@@ -2,10 +2,10 @@
 #define ApplicationUI_HPP_
 
 #include "AccountManager.h"
-#include "customsqldatasource.h"
 #include "LazySceneCover.h"
 #include "LocaleUtil.h"
 #include "Persistance.h"
+#include "QueryHelper.h"
 
 #include <bb/system/InvokeManager>
 
@@ -23,25 +23,29 @@ class ApplicationUI : public QObject
 {
 	Q_OBJECT
 
-	LocaleUtil m_locale;
 	AccountManager m_account;
 	LazySceneCover m_sceneCover;
 	Persistance m_persistance;
-	CustomSqlDataSource m_sql;
+	QueryHelper m_helper;
 	bb::system::InvokeManager m_invokeManager;
+	bb::system::InvokeRequest m_request;
+	QObject* m_root;
 
     ApplicationUI(bb::cascades::Application *app);
+    void init(QString const& qml);
 
 private slots:
     void invoked(bb::system::InvokeRequest const& request);
+    void lazyInit();
+
+signals:
+    void initialize();
 
 public:
 	static void create(bb::cascades::Application* app);
     virtual ~ApplicationUI();
     Q_INVOKABLE void invokeSettingsApp();
     Q_INVOKABLE void invokeAdobeReader(QUrl const& uri);
-    Q_INVOKABLE void analyze(QString const& domain);
-    Q_INVOKABLE void logBlocked(QString const& uri);
 };
 
 } // salat

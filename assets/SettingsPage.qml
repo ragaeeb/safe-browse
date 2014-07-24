@@ -1,5 +1,5 @@
 import bb.cascades 1.0
-import bb.system 1.0
+import bb.system 1.2
 import com.canadainc.data 1.0
 
 Page
@@ -113,13 +113,15 @@ Page
                             }
                         },
 
-                        SystemPrompt {
+                        SystemPrompt
+                        {
                             id: homePrompt
                             title: qsTr("Enter URL") + Retranslate.onLanguageChanged
                             body: qsTr("Enter the homepage address (ie: http://abdurrahman.org)") + Retranslate.onLanguageChanged
                             confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
                             cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
-                            inputField.emptyText: "http://abdurrahman.org"
+                            inputField.emptyText: "http://canadainc.org"
+                            inputOptions: SystemUiInputOption.None
                             
                             function showPrompt() {
                                 inputField.defaultText = persist.getValueFor("home");
@@ -127,10 +129,14 @@ Page
                             }
 
                             onFinished: {
-                                if (result == SystemUiResult.ConfirmButtonSelection) {
+                                if (result == SystemUiResult.ConfirmButtonSelection)
+                                {
                                     var request = inputFieldTextEntry();
-                                    request = uriUtil.removeProtocol(request);
-
+                                    
+                                    if ( request.indexOf("http://") != 0 ) {
+                                        request = "http://"+request;
+                                    }
+                                    
                                     persist.saveValueFor("home", request);
                                     persist.showToast( qsTr("Successfully set homepage to %1").arg(request) );
                                 }

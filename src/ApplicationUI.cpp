@@ -1,9 +1,12 @@
 #include "precompiled.h"
 
 #include "applicationui.hpp"
+#include "CardUtils.h"
+#include "InvocationUtils.h"
 #include "IOUtils.h"
 #include "Logger.h"
 #include "QueryId.h"
+#include "QueryHelper.h"
 
 namespace safebrowse {
 
@@ -11,77 +14,81 @@ using namespace bb::cascades;
 using namespace bb::system;
 using namespace canadainc;
 
-ApplicationUI::ApplicationUI(bb::cascades::Application *app) : QObject(app), m_account(&m_persistance), m_sceneCover("Cover.qml")
+ApplicationUI::ApplicationUI(bb::cascades::Application *app) :
+        QObject(app), m_account(&m_persistance), m_sceneCover("Cover.qml"),
+        m_helper(&m_persistance), m_root(NULL)
 {
-	INIT_SETTING("mode", "passive");
-	INIT_SETTING("home", "http://canadainc.org");
+    switch ( m_invokeManager.startupMode() )
+    {
+        case ApplicationStartupMode::LaunchApplication:
+            //LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
+            init("main.qml");
+            break;
 
-	QString database = QString("%1/database.db").arg( QDir::homePath() );
-	m_sql.setSource(database);
+        case ApplicationStartupMode::InvokeCard:
+            //LogMonitor::create(CARD_KEY, CARD_LOG_FILE, this);
+            connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
+            break;
+        case ApplicationStartupMode::InvokeApplication:
+            //LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
+            connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
+            break;
 
-	if ( !QFile(database).exists() ) {
-		QStringList qsl;
-		qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
-		qsl << "CREATE TABLE controlled (uri TEXT PRIMARY KEY)";
-		qsl << "CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
-		m_sql.initSetup(qsl, 99);
-	}
+        default:
+            break;
+    }
+}
 
-	qmlRegisterUncreatableType<QueryId>("com.canadainc.data", 1, 0, "QueryId", "Can't instantiate");
 
-	QmlDocument* qml = QmlDocument::create("asset:///main.qml").parent(this);
-    qml->setContextProperty("persist", &m_persistance);
-    qml->setContextProperty("security", &m_account);
-    qml->setContextProperty("sql", &m_sql);
-    qml->setContextProperty("localizer", &m_locale);
-    qml->setContextProperty("app", this);
+void ApplicationUI::init(QString const& qmlDoc)
+{
+    qmlRegisterUncreatableType<QueryId>("com.canadainc.data", 1, 0, "QueryId", "Can't instantiate");
 
-    AbstractPane* root = qml->createRootObject<AbstractPane>();
-    app->setScene(root);
+    QMap<QString, QObject*> context;
+    context.insert("security", &m_account);
+    context.insert("helper", &m_helper);
+    context.insert("app", this);
 
-	switch ( m_invokeManager.startupMode() )
-	{
-		case ApplicationStartupMode::InvokeApplication:
-		case ApplicationStartupMode::InvokeCard:
-			break;
+    LOGGER("Instantiate" << qmlDoc);
+    m_root = CardUtils::initAppropriate(qmlDoc, context, this);
+    emit initialize();
+}
 
-		default:
-			QUrl home = QUrl( m_persistance.getValueFor("home").toString() );
-			LOGGER("Setting homepage" << home);
-			root->setProperty("target", home);
-			break;
-	}
 
-	connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
-	connect( &m_network, SIGNAL( requestComplete(QVariant const&, QByteArray const&) ), this, SLOT( requestComplete(QVariant const&, QByteArray const&) ) );
+void ApplicationUI::lazyInit()
+{
+    INIT_SETTING("mode", "passive");
+    INIT_SETTING("home", "http://canadainc.org");
+
+    m_helper.initDatabase();
+
+    QString target = m_request.target();
+
+    if ( !target.isNull() ) {
+        m_root->setProperty( "target", m_request.uri() );
+    } else {
+        m_root->setProperty( "target", m_persistance.getValueFor("home") );
+    }
 }
 
 
 void ApplicationUI::invoked(bb::system::InvokeRequest const& request)
 {
-	QUrl uri = request.uri();
-	LOGGER("========= INVOKED WITH" << uri << uri.fragment() << "**" << uri.authority() << "host" << uri.host() << "path" << uri.path() << "scheme" << uri.scheme() << "tld" << uri.topLevelDomain() << "userinfo" << uri.userInfo() );
+    QString target = request.target();
 
-	Application::instance()->scene()->setProperty("target", uri);
-}
+    LOGGER( request.action() << target << request.mimeType() << request.metadata() << request.uri().toString() << QString( request.data() ) );
 
+    QMap<QString,QString> targetToQML;
 
-void ApplicationUI::analyze(QString const& domain)
-{
-    QString mode = m_persistance.getValueFor("mode").toString();
-    m_sql.setQuery( QString("SELECT * FROM %1 WHERE uri=? LIMIT 1").arg(mode) );
-    QVariantList params = QVariantList() << domain;
-    m_sql.executePrepared(params, QueryId::LookupDomain);
+    QString qml = targetToQML.value(target);
 
-    m_sql.setQuery( QString("INSERT INTO logs (action,comment) VALUES ('%1',?)").arg("requested") );
-    m_sql.executePrepared(params, QueryId::LogRequest);
-}
+    if ( qml.isNull() ) {
+        qml = "BrowserPane.qml";
+    }
 
+    init(qml);
 
-void ApplicationUI::logBlocked(QString const& uri)
-{
-    m_sql.setQuery( QString("INSERT INTO logs (action,comment) VALUES ('%1',?)").arg("blocked") );
-    m_sql.executePrepared( QVariantList() << uri, QueryId::LogBlocked );
+    m_request = request;
 }
 
 
@@ -99,15 +106,8 @@ void ApplicationUI::invokeAdobeReader(QUrl const& uri)
 }
 
 
-void ApplicationUI::invokeSettingsApp()
-{
-	bb::system::InvokeRequest request;
-	request.setTarget("sys.settings.target");
-	request.setAction("bb.action.OPEN");
-	request.setMimeType("settings/view");
-	request.setUri( QUrl("settings://childprotection") );
-
-	m_invokeManager.invoke(request);
+void ApplicationUI::invokeSettingsApp() {
+    InvocationUtils::launchSettingsApp("childprotection");
 }
 
 
