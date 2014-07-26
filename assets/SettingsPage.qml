@@ -163,7 +163,7 @@ Page
         
         ActionItem
         {
-            imageSource: "images/ic_logs.png"
+            imageSource: "images/menu/ic_logs.png"
             title: qsTr("View Logs") + Retranslate.onLanguageChanged
             
             shortcuts: [
@@ -204,6 +204,20 @@ Page
             }
         ]
         
+        onOpacityChanged: {
+            if (opacity == 1)
+            {
+                if ( persist.tutorial( "tutorialParental", qsTr("To disable the native Browser, Swipe-down from the BlackBerry 10 home screen and choose Settings.\nThen scroll down in the list and go to 'Security & Privacy.\nSelect 'Parental Controls'.\nEnable the parental controls toggle button.\nChoose a password.\nDisallow the browser toggle button.\n\nYou can also access this Parental Controls screen by tapping on the Help from the top-menu in Safe Browse."), "asset:///images/toast/ic_instructions.png" ) ) {}
+                else if ( persist.tutorial( "tutorialInstallApp", qsTr("For added security you might also want to disable the 'Install Application' toggle button from the Parental Controls so that no one can download additional web browsing apps."), "asset:///images/toast/ic_instructions.png" ) ) {}
+                else if ( persist.tutorial( "tutorialRemoveApp", qsTr("For added security you might also want to disable the 'Remove Application' toggle button from the Parental Controls so that no one can delete this app and get rid of all your blocking settings."), "asset:///images/toast/ic_instructions.png" ) ) {}
+                else if ( persist.tutorial( "tutorialPassive", qsTr("If you want to allow all websites except certain ones, choose 'Passive' from the Browsing Mode dropdown."), "asset:///images/dropdown/ic_passive.png" ) ) {}
+                else if ( persist.tutorial( "tutorialControlled", qsTr("If you want to block all websites except certain ones, choose 'Controlled' from the Browsing Mode dropdown."), "asset:///images/dropdown/ic_controlled.png" ) ) {}
+                else if ( persist.tutorial( "tutorialViewLogs", qsTr("You can use the 'View Logs' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred."), "asset:///images/menu/ic_logs.png" ) ) {}
+                else if ( persist.tutorial( "tutorialChangePassword", qsTr("If you want to change your password, you can choose the 'Change Password' item from the menu."), "asset:///images/ic_password.png" ) ) {}
+                else if ( persist.tutorial( "tutorialClearCache", qsTr("If you notice the app taking up a lot of space, you should choose 'Clear Cache' from the menu."), "asset:///images/menu/ic_clear_cache.png" ) ) {}
+            }
+        }
+        
         background: back.imagePaint
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
@@ -235,6 +249,7 @@ Page
                     if (selectedValue == "passive") {
                         persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "", "asset:///images/dropdown/ic_passive.png" );
                     } else if (selectedValue == "controlled") {
+                        if ( persist.tutorial( "tutorialSafeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "asset:///images/menu/ic_safe_run.png" ) ) {}
                         persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "", "asset:///images/dropdown/ic_controlled.png" );
                     }
                 }
@@ -324,11 +339,11 @@ Page
                     }
                 }
             ]
-            
+
             function remove(ListItemData) {
                 helper.unblockSite(listView, modeDropDown.selectedValue, ListItemData.uri);
             }
-            
+
             function onDataLoaded(id, data)
             {
                 if (id == QueryId.GetAll)
@@ -338,6 +353,7 @@ Page
                     
                     listView.visible = !adm.isEmpty();
                     noElements.delegateActive = !listView.visible;
+                    if ( !adm.isEmpty() && persist.tutorial( "tutorialRemoveBlocked", qsTr("To remove a blocked site from the list, tap on it and choose 'Delete' from the menu."), "asset:///images/menu/ic_unblock.png" ) ) {}
                 } else if (id == QueryId.InsertEntry) {
                     helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
                 } else if (id == QueryId.DeleteEntry) {
@@ -360,12 +376,12 @@ Page
             
             onFinished: {
                 console.log( "UserEvent: PasswordEntered", value, inputFieldTextEntry() );
-                
+
                 if (value == SystemUiResult.ConfirmButtonSelection)
                 {
                     var password = inputFieldTextEntry().trim();
                     var loggedIn = security.login(password);
-                    
+
                     if (!loggedIn)
                     {
                         helper.logFailedLogin(listView, password);

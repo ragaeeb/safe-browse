@@ -103,6 +103,11 @@ TabbedPane
             var sheet = definition.createObject();
             sheet.closed.connect(onClosed);
             sheet.open();
+        } else {
+            if ( persist.tutorial( "tutorialSettings", qsTr("If you want to manage the list of websites that should be allowed or blocked, swipe-down from the top-bezel and go to Settings."), "asset:///images/menu/ic_settings.png" ) ) {}
+            else if ( persist.tutorial( "tutorialPinHomeScreen", qsTr("To bookmark a page, you can choose 'Pin to Homescreen' from the menu."), "asset:///images/menu/ic_pin.png" ) ) {}
+            else if ( persist.tutorial( "tutorialNewTab", qsTr("You can have more than one tab open! Swipe towards the right by dragging the menu on the left, and tap on 'New Tab' to open a new page to browse."), "asset:///images/tabs/ic_new_tab.png" ) ) {}
+            else if ( persist.tutorial( "tutorialBrowse", qsTr("Tap on the Browse icon at the bottom to enter a new address to visit."), "asset:///images/ic_globe.png" ) ) {}
         }
     }
     
