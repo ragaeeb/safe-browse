@@ -2,7 +2,7 @@ APP_NAME = SafeBrowse
 
 INCLUDEPATH += ../src ../../canadainc/src/
 CONFIG += qt warn_on cascades10
-LIBS += -lbbsystem -lbbdata -lbbutilityi18n
+LIBS += -lbbsystem -lbbdata -lbbutilityi18n -lbbplatform -lbb
 QT += network
 
 CONFIG(release, debug|release) {

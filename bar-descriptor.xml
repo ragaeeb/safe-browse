@@ -123,6 +123,15 @@
         </filter>
     </invoke-target>
     
+	<invoke-target id="com.canadainc.SafeBrowse.shortcut">
+		<invoke-target-type>application</invoke-target-type>
+		<filter>
+			<action>bb.action.VIEW</action>
+			<mime-type>*</mime-type>
+			<property var="uris" value="safebrowse:"/>
+		</filter>
+	</invoke-target>
+    
     <!-- Locale support -->
     <asset path="translations" dest="qm">
         <include name="*.qm"/>
