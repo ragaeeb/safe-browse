@@ -138,6 +138,17 @@ Page
                 var page = definition.createObject();
                 dashPage.parent.push(page);
             }
+        },
+        
+        DeleteActionItem
+        {
+            imageSource: "images/menu/ic_clear_cache.png"
+            title: qsTr("Clear Cache") + Retranslate.onLanguageChanged
+            
+            onTriggered: {
+                console.log("UserEvent: ClearCacheTriggered");
+                persist.clearCache();
+            }
         }
     ]
     
