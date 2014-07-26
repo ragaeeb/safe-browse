@@ -25,10 +25,11 @@ Page
         
         ActionItem {
             title: qsTr("Parental Control") + Retranslate.onLanguageChanged
-            imageSource: "images/ic_instructions.png"
+            imageSource: "images/menu/ic_parents.png"
             ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
 
             onTriggered: {
+                console.log("UserEvent: ParentalControlsTriggered");
                 app.invokeSettingsApp();
             }
         }
