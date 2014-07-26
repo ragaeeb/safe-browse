@@ -93,7 +93,7 @@ Page
                         {
                             var request = inputFieldTextEntry().trim();
 
-                            persist.saveValueFor("home", request);
+                            persist.saveValueFor("home", request, false);
                             persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "", "asset:///images/ic_home.png" );
                         }
                     }
