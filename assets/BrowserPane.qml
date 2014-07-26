@@ -48,6 +48,12 @@ NavigationPane
                 enabled: detailsView.canGoBack
                 ActionBar.placement: ActionBarPlacement.OnBar
                 
+                shortcuts: [
+                    SystemShortcut {
+                        type: SystemShortcuts.PreviousSection
+                    }
+                ]
+                
                 onTriggered: {
                     detailsView.goBack();
                 }
@@ -97,6 +103,12 @@ NavigationPane
                 enabled: detailsView.canGoForward
                 ActionBar.placement: ActionBarPlacement.OnBar
                 
+                shortcuts: [
+                    SystemShortcut {
+                        type: SystemShortcuts.NextSection
+                    }
+                ]
+                
                 onTriggered: {
                     detailsView.goForward();
                 }
@@ -105,6 +117,12 @@ NavigationPane
             ActionItem {
                 title: qsTr("Refresh") + Retranslate.onLanguageChanged
                 imageSource: "images/ic_refresh.png"
+                
+                shortcuts: [
+                    SystemShortcut {
+                        type: SystemShortcuts.Reply
+                    }
+                ]
                 
                 onTriggered: {
                     if (target == "local:///") {

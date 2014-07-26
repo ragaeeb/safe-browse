@@ -27,6 +27,12 @@ Page
             title: qsTr("Add") + Retranslate.onLanguageChanged
             ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
             
+            shortcuts: [
+                SystemShortcut {
+                    type: SystemShortcuts.CreateNew
+                }
+            ]
+            
             onTriggered: {
                 console.log("UserEvent: AddSiteTriggered");
                 addPrompt.show();
@@ -119,6 +125,12 @@ Page
         {
             imageSource: "images/ic_logs.png"
             title: qsTr("View Logs") + Retranslate.onLanguageChanged
+            
+            shortcuts: [
+                Shortcut {
+                    key: qsTr("V") + Retranslate.onLanguageChanged
+                }
+            ]
             
             onTriggered: {
                 console.log("UserEvent: ViewLogsTriggered");
