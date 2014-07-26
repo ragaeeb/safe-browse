@@ -37,7 +37,7 @@ public:
     Q_INVOKABLE void analyze(QObject* caller, QUrl const& domain);
     Q_INVOKABLE void analyzeKeywords(QObject* caller, QString const& title);
     Q_INVOKABLE QStringList blockKeywords(QObject* caller, QVariantList const& keywords);
-    Q_INVOKABLE void blockSite(QObject* caller, QString const& mode, QString const& uri);
+    Q_INVOKABLE void blockSite(QObject* caller, QString const& mode, QString uri);
     Q_INVOKABLE void clearAllLogs(QObject* caller);
     Q_INVOKABLE void clearBlockedKeywords(QObject* caller);
     Q_INVOKABLE void fetchAllBlocked(QObject* caller, QString const& mode);
