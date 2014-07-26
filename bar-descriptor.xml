@@ -131,6 +131,14 @@
 			<property var="uris" value="safebrowse:"/>
 		</filter>
 	</invoke-target>
+	
+	<invoke-target id="com.canadainc.SafeBrowse.search">
+	<invoke-target-type>application</invoke-target-type>
+	<filter>
+		<action>bb.action.SEARCH.EXTENDED</action>
+		<mime-type>application/vnd.bb.search.criteria</mime-type>
+	</filter>
+	</invoke-target>
     
     <!-- Locale support -->
     <asset path="translations" dest="qm">

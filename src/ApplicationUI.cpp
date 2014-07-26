@@ -10,8 +10,8 @@
 #include "QueryHelper.h"
 #include "TextUtils.h"
 
-#define TARGET_PREVIEW "com.canadainc.SafeBrowse.preview"
 #define TARGET_SHORTCUT "com.canadainc.SafeBrowse.shortcut"
+#define TARGET_SEARCH "com.canadainc.SafeBrowse.search"
 
 namespace {
 
@@ -106,6 +106,13 @@ void ApplicationUI::lazyInit()
             if (ok) {
                 uri = data["url"].toUrl();
                 url = uri.toString();
+            }
+        } else if (target == TARGET_SEARCH) {
+            url = m_request.data();
+
+            if ( !url.startsWith("http") ) {
+                url = "http://"+url;
+                uri = QUrl(url);
             }
         }
 
