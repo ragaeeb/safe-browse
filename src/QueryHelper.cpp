@@ -30,13 +30,15 @@ void QueryHelper::analyze(QObject* caller, QUrl const& domain)
     LOGGER(domain);
 
     QStringList tokens = domain.host().split(".");
+    LOGGER(tokens);
     int n = tokens.size();
 
     if (n > 1)
     {
         m_sql.executeQuery(caller, "INSERT INTO logs (action,comment) VALUES ('requested',?)", QueryId::LogRequest, QVariantList() << domain.toString() );
 
-        QString host = QString("%1.%2").arg( tokens.takeLast() ).arg( tokens.takeLast() );
+        tokens.takeFirst(); // remove www
+        QString host = tokens.join(".");
         m_sql.executeQuery(caller, QString("SELECT uri FROM %1 WHERE uri=? LIMIT 1").arg(m_mode), QueryId::LookupDomain, QVariantList() << host );
     }
 }
@@ -53,7 +55,7 @@ void QueryHelper::fetchAllLogs(QObject* caller, QString const& filterAction)
 {
     LOGGER(filterAction);
 
-    QString query = filterAction.isEmpty() ? "SELECT * from logs" : QString("SELECT * from logs WHERE action='%1'").arg(filterAction);
+    QString query = filterAction.isEmpty() ? "SELECT * from logs ORDER BY timestamp DESC" : QString("SELECT * from logs WHERE action='%1' ORDER BY timestamp DESC").arg(filterAction);
     m_sql.executeQuery(caller, query, QueryId::GetLogs);
 }
 
