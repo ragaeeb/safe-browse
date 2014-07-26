@@ -9,11 +9,15 @@ namespace {
 
 QString extractHost(QUrl const& domain)
 {
-    QStringList tokens = domain.host().split(".");
+    QStringList tokens = domain.host().toLower().split(".");
     int n = tokens.size();
 
-    if (n > 1) {
-        tokens.takeFirst(); // remove www
+    if (n > 1)
+    {
+        if (tokens.first() == "www") {
+            tokens.takeFirst(); // remove www
+        }
+
         return tokens.join(".");
     } else {
         return "";
@@ -123,10 +127,15 @@ void QueryHelper::logFailedLogin(QObject* caller, QString const& inputPassword)
 }
 
 
-void QueryHelper::blockSite(QObject* caller, QString const& mode, QString const& uri)
+void QueryHelper::blockSite(QObject* caller, QString const& mode, QString uri)
 {
     LOGGER(mode << uri);
-    m_sql.executeQuery(caller, QString("INSERT INTO %1 (uri) VALUES (?)").arg(mode), QueryId::InsertEntry, QVariantList() << uri);
+
+    uri = extractHost( QUrl::fromUserInput(uri) );
+
+    if ( !uri.isEmpty() ) {
+        m_sql.executeQuery(caller, QString("INSERT INTO %1 (uri) VALUES (?)").arg(mode), QueryId::InsertEntry, QVariantList() << uri);
+    }
 }
 
 
@@ -157,7 +166,14 @@ bool QueryHelper::initDatabase()
 
         m_sql.initSetup(NULL, qsl, QueryId::Setup);
 
+        if ( !m_persist->contains("keywordsCreated") ) {
+            m_persist->saveValueFor("keywordsCreated",true,false);
+        }
+
         return false;
+    } else if ( !m_persist->contains("keywordsCreated") ) {
+        m_sql.executeQuery(NULL, "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )", QueryId::Setup);
+        m_persist->saveValueFor("keywordsCreated",true,false);
     }
 
     settingChanged("mode");
@@ -209,11 +225,15 @@ void QueryHelper::analyzeKeywords(QObject* caller, QString const& title)
         QStringList tokens = title.trimmed().toLower().split(" ");
         QVariantList values;
         QStringList placeHolders;
+        static QRegExp regex("[a-z]+");
 
         foreach (QString const& token, tokens)
         {
-            values << token;
-            placeHolders << "?";
+            if ( token.length() > 2 && regex.exactMatch(token) )
+            {
+                values << token;
+                placeHolders << "?";
+            }
         }
 
         if ( !values.isEmpty() )
