@@ -26,11 +26,13 @@ StandardListItem
                 duration: 200
             }
             
-            delay: sli.ListItem.indexInSection * 100
+            delay: Math.min(sli.ListItem.indexInSection*100, 1000)
         }
     ]
     
-    onCreationCompleted: {
-        showAnim.play();
+    ListItem.onInitializedChanged: {
+        if (initialized) {
+            showAnim.play();
+        }
     }
 }
