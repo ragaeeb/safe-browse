@@ -7,6 +7,8 @@ NavigationPane
     id: navigationPane
     property alias target: detailsView.url
     property bool showClose: false
+    property alias currentProgress: progressIndicator.value
+    property alias totalProgress: progressIndicator.toValue
     signal closeTab();
     
     function promptForAddress() {
