@@ -64,6 +64,7 @@ void ApplicationUI::init(QString const& qmlDoc)
     context.insert("security", &m_account);
     context.insert("helper", &m_helper);
     context.insert("app", this);
+    context.insert("network", &m_network);
 
     LOGGER("Instantiate" << qmlDoc);
     m_root = CardUtils::initAppropriate(qmlDoc, context, this);
