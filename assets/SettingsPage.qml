@@ -9,7 +9,11 @@ Page
     titleBar: SafeTitleBar {}
     
     onCreationCompleted: {
-        loginPrompt.show();
+        if (!security.authenticated) {
+            loginPrompt.show();
+        } else {
+            guardianContainer.opacity = 1;
+        }
     }
     
     actions: [
