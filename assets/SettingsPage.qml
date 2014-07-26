@@ -41,11 +41,14 @@ Page
                     confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
                     cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
                     inputField.emptyText: "youtube.com"
+                    inputOptions: SystemUiInputOption.None
                     
                     onFinished: {
-                        if (result == SystemUiResult.ConfirmButtonSelection)
+                        console.log( "UserEvent: NewAddressToBlockEntered", value, inputFieldTextEntry() );
+
+                        if (value == SystemUiResult.ConfirmButtonSelection)
                         {
-                            var request = inputFieldTextEntry();
+                            var request = inputFieldTextEntry().trim();
                             request = uriUtil.removeProtocol(request);
                             
                             helper.blockSite(listView, modeDropDown.selectedValue, request);
@@ -83,6 +86,8 @@ Page
                     }
                     
                     onFinished: {
+                        console.log( "UserEvent: HomepageAddressEntered", value, inputFieldTextEntry() );
+                        
                         if (result == SystemUiResult.ConfirmButtonSelection)
                         {
                             var request = inputFieldTextEntry();
@@ -117,7 +122,9 @@ Page
             
             onTriggered: {
                 console.log("UserEvent: ViewLogsTriggered");
-                dashPage.showSheet("ViewLogsSheet.qml");
+                definition.source = "ViewLogsPage.qml";
+                var page = definition.createObject();
+                dashPage.parent.push(page);
             }
         }
     ]
@@ -256,7 +263,7 @@ Page
             ]
             
             function remove(ListItemData) {
-                helper.unblockSite(modeDropDown.selectedValue, ListItemData.uri);
+                helper.unblockSite(listView, modeDropDown.selectedValue, ListItemData.uri);
             }
             
             function onDataLoaded(id, data)
@@ -289,6 +296,8 @@ Page
             inputField.inputMode: SystemUiInputMode.Password
             
             onFinished: {
+                console.log( "UserEvent: PasswordEntered", value, inputFieldTextEntry() );
+                
                 if (value == SystemUiResult.ConfirmButtonSelection)
                 {
                     var password = inputFieldTextEntry().trim();

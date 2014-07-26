@@ -4,6 +4,7 @@
 #include "CardUtils.h"
 #include "InvocationUtils.h"
 #include "IOUtils.h"
+#include "LocaleUtil.h"
 #include "Logger.h"
 #include "QueryId.h"
 #include "QueryHelper.h"
@@ -108,6 +109,11 @@ void ApplicationUI::invokeAdobeReader(QUrl const& uri)
 
 void ApplicationUI::invokeSettingsApp() {
     InvocationUtils::launchSettingsApp("childprotection");
+}
+
+
+QString ApplicationUI::renderStandardTime(QDateTime const& theTime) {
+    return LocaleUtil::renderStandardTime(theTime);
 }
 
 

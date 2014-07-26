@@ -3,7 +3,6 @@
 
 #include "AccountManager.h"
 #include "LazySceneCover.h"
-#include "LocaleUtil.h"
 #include "Persistance.h"
 #include "QueryHelper.h"
 
@@ -46,6 +45,7 @@ public:
     virtual ~ApplicationUI();
     Q_INVOKABLE void invokeSettingsApp();
     Q_INVOKABLE void invokeAdobeReader(QUrl const& uri);
+    Q_INVOKABLE QString renderStandardTime(QDateTime const& theTime);
 };
 
 } // salat
