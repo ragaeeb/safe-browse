@@ -94,6 +94,7 @@
     <asset path="../canadainc/assets/EmptyDelegate.qml">assets/EmptyDelegate.qml</asset>
     <asset path="../canadainc/assets/OfflineDelegate.qml">assets/OfflineDelegate.qml</asset>
     <asset path="../canadainc/assets/PersistDropDown.qml">assets/PersistDropDown.qml</asset>
+    <asset path="../canadainc/assets/PersistCheckBox.qml">assets/PersistCheckBox.qml</asset>
     <asset path="../canadainc/assets/SignupSheet.qml">assets/SignupSheet.qml</asset>
     
     <invoke-target id="com.canadainc.SafeBrowse.browse">

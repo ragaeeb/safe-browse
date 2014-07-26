@@ -6,10 +6,13 @@
 #include "IOUtils.h"
 #include "LocaleUtil.h"
 #include "Logger.h"
+#include "LogMonitor.h"
 #include "QueryId.h"
 #include "QueryHelper.h"
+#include "SafeBrowseCollector.h"
 #include "TextUtils.h"
 
+#define CARD_KEY "logCard"
 #define TARGET_SHORTCUT "com.canadainc.SafeBrowse.shortcut"
 #define TARGET_SEARCH "com.canadainc.SafeBrowse.search"
 
@@ -38,19 +41,22 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app) :
         QObject(app), m_account(&m_persistance), m_sceneCover("Cover.qml"),
         m_helper(&m_persistance), m_root(NULL)
 {
+    INIT_SETTING(CARD_KEY, true);
+    INIT_SETTING(UI_KEY, true);
+
     switch ( m_invokeManager.startupMode() )
     {
         case ApplicationStartupMode::LaunchApplication:
-            //LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
+            LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
             init("main.qml");
             break;
 
         case ApplicationStartupMode::InvokeCard:
-            //LogMonitor::create(CARD_KEY, CARD_LOG_FILE, this);
+            LogMonitor::create(CARD_KEY, CARD_LOG_FILE, this);
             connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
         case ApplicationStartupMode::InvokeApplication:
-            //LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
+            LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
             connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
 
@@ -136,6 +142,8 @@ void ApplicationUI::lazyInit()
 
         m_root->setProperty("target", home);
     }
+
+    AppLogFetcher::create( new SafeBrowseCollector(), this );
 }
 
 
@@ -250,14 +258,13 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
         } else {
             m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
 #if defined(QT_NO_DEBUG)
-        //AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
 #endif
         }
     } else {
-        LOGGER("***");
         m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
 #if defined(QT_NO_DEBUG)
-        //AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
 #endif
     }
 }
