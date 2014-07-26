@@ -55,8 +55,6 @@ Page
                         if (value == SystemUiResult.ConfirmButtonSelection)
                         {
                             var request = inputFieldTextEntry().trim();
-                            request = uriUtil.removeProtocol(request);
-                            
                             helper.blockSite(listView, modeDropDown.selectedValue, request);
                         }
                     }
@@ -96,12 +94,8 @@ Page
                         
                         if (result == SystemUiResult.ConfirmButtonSelection)
                         {
-                            var request = inputFieldTextEntry();
-                            
-                            if ( request.indexOf("http://") != 0 ) {
-                                request = "http://"+request;
-                            }
-                            
+                            var request = inputFieldTextEntry().trim();
+
                             persist.saveValueFor("home", request);
                             persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "", "asset:///images/ic_home.png" );
                         }
@@ -268,7 +262,7 @@ Page
                                     toX: 1
                                     fromY: 0.8
                                     toY: 1
-                                    duration: 800
+                                    duration: 600
                                     easingCurve: StockCurve.ElasticOut
                                 }
                                 
@@ -278,7 +272,7 @@ Page
                                     duration: 200
                                 }
                                 
-                                delay: rootItem.ListItem.indexInSection * 100
+                                delay: Math.min(rootItem.ListItem.indexInSection*100, 1000)
                             }
                         ]
                     }
@@ -339,10 +333,6 @@ Page
                     dashPage.parent.pop();
                 }
             }
-        },
-
-        UriUtil {
-            id: uriUtil
         }
     ]
 }

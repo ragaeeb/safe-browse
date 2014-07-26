@@ -8,6 +8,10 @@
 #include "Logger.h"
 #include "QueryId.h"
 #include "QueryHelper.h"
+#include "TextUtils.h"
+
+#define TARGET_PREVIEW "com.canadainc.SafeBrowse.preview"
+#define TARGET_SHORTCUT "com.canadainc.SafeBrowse.shortcut"
 
 namespace {
 
@@ -74,11 +78,12 @@ void ApplicationUI::init(QString const& qmlDoc)
 
 void ApplicationUI::lazyInit()
 {
+    INIT_FRESH("v2.0");
     INIT_SETTING("mode", "passive");
     INIT_SETTING("home", "http://canadainc.org");
 
+    connect( &m_network, SIGNAL( downloadProgress(QVariant const&, qint64, qint64) ), this, SLOT( progress(QVariant const&, qint64, qint64) ) );
     connect( &m_network, SIGNAL( requestComplete(QVariant const&, QByteArray const&) ), this, SLOT( requestComplete(QVariant const&, QByteArray const&) ) );
-    connect( &m_network, SIGNAL( downloadProgress(QVariant const&, qint64, qint64) ), this, SIGNAL( progress(QVariant const&, qint64, qint64) ) );
 
     m_helper.initDatabase();
 
@@ -89,6 +94,21 @@ void ApplicationUI::lazyInit()
         QUrl uri = m_request.uri();
         QString url = uri.toString();
 
+        if (target == TARGET_SHORTCUT)
+        {
+            url = m_request.uri().toString(QUrl::RemoveScheme);
+
+            url = QUrl::fromPercentEncoding( url.toAscii() );
+            bool ok = false;
+
+            QVariantMap data = bb::PpsObject::decode( url.toAscii(), &ok );
+
+            if (ok) {
+                uri = data["url"].toUrl();
+                url = uri.toString();
+            }
+        }
+
         QString extension = url.toLower().split(".").last();
 
         if ( m_extensions.contains(extension) ) {
@@ -97,7 +117,13 @@ void ApplicationUI::lazyInit()
             m_root->setProperty("target", uri);
         }
     } else {
-        m_root->setProperty( "target", m_persistance.getValueFor("home") );
+        QString home = m_persistance.getValueFor("home").toString();
+
+        if ( !home.startsWith("http") ) {
+            home = "http://"+home;
+        }
+
+        m_root->setProperty("target", home);
     }
 }
 
@@ -186,6 +212,43 @@ void ApplicationUI::invokeSystemApp(QUrl const& uri)
 
 void ApplicationUI::invokeSettingsApp() {
     InvocationUtils::launchSettingsApp("childprotection");
+}
+
+
+void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QString icon)
+{
+    LOGGER(label << url << icon);
+
+    QVariantMap data;
+    data["url"] = url.toString();
+
+    bool ok = false;
+    QString ascii = QString::fromAscii( bb::PpsObject::encode(data, &ok) );
+    LOGGER("ASCII" << ok << ascii);
+
+    if (ok)
+    {
+        QString encoded = QString::fromAscii( QUrl::toPercentEncoding(ascii) );
+
+        QString uri = QString("safebrowse:%1").arg(encoded);
+        LOGGER("Uri saving:" << uri);
+        bool added = bb::platform::HomeScreen().addShortcut( QUrl("asset:///images/icon_shortcut.png"), TextUtils::sanitize(label), uri);
+
+        if (added) {
+            m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "", "asset:///images/icon_shortcut.png" );
+        } else {
+            m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
+#if defined(QT_NO_DEBUG)
+        //AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+#endif
+        }
+    } else {
+        LOGGER("***");
+        m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
+#if defined(QT_NO_DEBUG)
+        //AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+#endif
+    }
 }
 
 

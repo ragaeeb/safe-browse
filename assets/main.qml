@@ -91,9 +91,8 @@ TabbedPane
         }
     }
     
-    function onClosed()
-    {
-        console.log("*** CLOSED");
+    function onClosed() {
+        menuDef.settings.triggered();
     }
     
     function onReady()

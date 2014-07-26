@@ -49,6 +49,7 @@ signals:
 public:
 	static void create(bb::cascades::Application* app);
     virtual ~ApplicationUI();
+    Q_INVOKABLE void addToHomeScreen(QString const& label, QUrl const& url, QString icon);
     Q_INVOKABLE void invokeSettingsApp();
     Q_INVOKABLE void invokeSystemApp(QUrl const& uri);
     Q_INVOKABLE QString renderStandardTime(QDateTime const& theTime);

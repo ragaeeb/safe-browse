@@ -1,4 +1,4 @@
-import bb.cascades 1.0
+import bb.cascades 1.2
 import bb.system 1.2
 import com.canadainc.data 1.0
 
@@ -46,7 +46,7 @@ NavigationPane
         actions: [
             ActionItem {
                 title: qsTr("Back") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_back.png"
+                imageSource: "images/menu/ic_back.png"
                 enabled: detailsView.canGoBack
                 ActionBar.placement: ActionBarPlacement.OnBar
                 
@@ -101,7 +101,7 @@ NavigationPane
             
             ActionItem {
                 title: qsTr("Forward") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_forward.png"
+                imageSource: "images/menu/ic_forward.png"
                 enabled: detailsView.canGoForward
                 ActionBar.placement: ActionBarPlacement.OnBar
                 
@@ -117,8 +117,31 @@ NavigationPane
             },
             
             ActionItem {
+                title: qsTr("Pin to Homescreen") + Retranslate.onLanguageChanged
+                imageSource: "images/menu/ic_pin.png"
+                enabled: detailsView.title.length > 0
+                
+                onTriggered: {
+                    console.log("UserEvent: PinToHomeScreenTriggered");
+                    
+                    shortcut.active = true;
+                    shortcut.object.defaultTitle = detailsView.title;
+                    shortcut.object.urlToPin = detailsView.url;
+                    shortcut.object.openPinPrompt();
+                }
+                
+                attachedObjects: [
+                    Delegate {
+                        id: shortcut
+                        active: false
+                        source: "ShortcutHelper.qml"
+                    }
+                ]
+            },
+            
+            ActionItem {
                 title: qsTr("Refresh") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_refresh.png"
+                imageSource: "images/menu/ic_refresh.png"
                 
                 shortcuts: [
                     SystemShortcut {

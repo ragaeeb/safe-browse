@@ -5,3 +5,7 @@
 #include <bb/cascades/SceneCover>
 
 #include <bb/system/InvokeManager>
+
+#include <bb/platform/HomeScreen>
+
+#include <bb/PpsObject>
