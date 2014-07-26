@@ -78,7 +78,11 @@ void ApplicationUI::init(QString const& qmlDoc)
 
 void ApplicationUI::lazyInit()
 {
-    INIT_FRESH("v2.0");
+    if ( !m_persistance.contains("v2.0") ) {
+        QFile::remove(DATABASE_PATH);
+        m_persistance.saveValueFor("v2.0", true, false);
+    }
+
     INIT_SETTING("mode", "passive");
     INIT_SETTING("home", "http://canadainc.org");
 

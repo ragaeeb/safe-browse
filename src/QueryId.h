@@ -13,15 +13,20 @@ class QueryId
 public:
     enum Type {
     	ClearLogs,
+    	ClearKeywords,
     	InsertEntry,
+    	InsertKeyword,
     	DeleteEntry,
+    	DeleteKeyword,
     	GetAll,
+        GetKeywords,
     	GetLogs,
     	InsertBlocked,
     	LogBlocked,
         LogFailedLogin,
     	LogRequest,
     	LookupDomain,
+    	LookupKeywords,
     	Setup,
     	SettingUp,
     };

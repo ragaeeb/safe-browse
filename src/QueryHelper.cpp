@@ -56,6 +56,13 @@ void QueryHelper::analyze(QObject* caller, QUrl const& domain)
 }
 
 
+void QueryHelper::clearBlockedKeywords(QObject* caller)
+{
+    LOGGER("clearAllKeywords");
+    m_sql.executeQuery(caller, "DELETE from keywords", QueryId::ClearKeywords);
+}
+
+
 void QueryHelper::clearAllLogs(QObject* caller)
 {
     LOGGER("clearAllLogs");
@@ -69,6 +76,36 @@ void QueryHelper::fetchAllLogs(QObject* caller, QString const& filterAction)
 
     QString query = filterAction.isEmpty() ? "SELECT * from logs ORDER BY timestamp DESC" : QString("SELECT * from logs WHERE action='%1' ORDER BY timestamp DESC").arg(filterAction);
     m_sql.executeQuery(caller, query, QueryId::GetLogs);
+}
+
+
+void QueryHelper::fetchAllBlockedKeywords(QObject* caller)
+{
+    LOGGER("fetchAllBlockedKeywords");
+    m_sql.executeQuery(caller, "SELECT term FROM keywords ORDER BY term", QueryId::GetKeywords);
+}
+
+
+QStringList QueryHelper::blockKeywords(QObject* caller, QVariantList const& keywords)
+{
+    LOGGER(keywords);
+
+    QStringList all;
+    QStringList keywordsList;
+    all << QString("INSERT OR IGNORE INTO keywords (term) SELECT ? AS 'term'");
+    QString addition = QString("UNION SELECT ?");
+
+    for (int i = keywords.size()-1; i >= 0; i--)
+    {
+        all << addition;
+        keywordsList << keywords[i].toString();
+    }
+
+    all.removeLast();
+
+    m_sql.executeQuery(caller, all.join(" "), QueryId::InsertKeyword, keywords);
+
+    return keywordsList;
 }
 
 
@@ -114,7 +151,9 @@ bool QueryHelper::initDatabase()
         QStringList qsl;
         qsl << "CREATE TABLE controlled (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
+        qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
+        qsl << "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )";
 
         m_sql.initSetup(NULL, qsl, QueryId::Setup);
 
@@ -127,6 +166,28 @@ bool QueryHelper::initDatabase()
 }
 
 
+QStringList QueryHelper::unblockKeywords(QObject* caller, QVariantList const& keywords)
+{
+    LOGGER("unblockKeywords" << keywords);
+
+    QStringList keywordsList;
+    QVariantList keywordsVariants;
+    QStringList placeHolders;
+
+    for (int i = keywords.size()-1; i >= 0; i--)
+    {
+        QString current = keywords[i].toMap().value("term").toString();
+        keywordsVariants << current;
+        keywordsList << current;
+        placeHolders << "?";
+    }
+
+    m_sql.executeQuery( caller, QString("DELETE FROM keywords WHERE term IN (%1)").arg( placeHolders.join(",") ), QueryId::DeleteKeyword, keywordsVariants);
+
+    return keywordsList;
+}
+
+
 void QueryHelper::safeRunSite(QObject* caller, QUrl const& domain)
 {
     LOGGER(domain);
@@ -135,6 +196,31 @@ void QueryHelper::safeRunSite(QObject* caller, QUrl const& domain)
 
     if ( !host.isEmpty() ) {
         blockSite(caller, m_mode, host);
+    }
+}
+
+
+void QueryHelper::analyzeKeywords(QObject* caller, QString const& title)
+{
+    LOGGER(title);
+
+    if (m_mode == "passive")
+    {
+        QStringList tokens = title.trimmed().toLower().split(" ");
+        QVariantList values;
+        QStringList placeHolders;
+
+        foreach (QString const& token, tokens)
+        {
+            values << token;
+            placeHolders << "?";
+        }
+
+        if ( !values.isEmpty() )
+        {
+            QString keywordQuery = QString("SELECT term FROM keywords WHERE term IN (%1)").arg( placeHolders.join(",") );
+            m_sql.executeQuery(caller, keywordQuery, QueryId::LookupKeywords, values);
+        }
     }
 }
 
