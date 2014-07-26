@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE void fetchAllLogs(QObject* caller, QString const& filterAction=QString());
     Q_INVOKABLE void logBlocked(QObject* caller, QString const& uri);
     Q_INVOKABLE void logFailedLogin(QObject* caller, QString const& inputPassword);
+    Q_INVOKABLE void safeRunSite(QObject* caller, QUrl const& domain);
     Q_INVOKABLE void unblockSite(QObject* caller, QString const& mode, QString const& uri);
     static bool databaseReady();
 };

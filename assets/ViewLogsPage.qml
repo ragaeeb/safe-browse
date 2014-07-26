@@ -40,7 +40,7 @@ Page
                 id: allFilter
                 text: qsTr("All") + Retranslate.onLanguageChanged
                 description: qsTr("Show All Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_logs_all.png"
+                imageSource: "images/dropdown/ic_logs_all.png"
                 value: ""
             }
             
@@ -48,7 +48,7 @@ Page
                 id: loginFilter
                 text: qsTr("Authentication") + Retranslate.onLanguageChanged
                 description: qsTr("Show Only Login Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_logs_authentication.png"
+                imageSource: "images/dropdown/ic_logs_authentication.png"
                 value: "failed_login"
             }
             
@@ -56,7 +56,7 @@ Page
                 id: browsingFilter
                 text: qsTr("Browsing") + Retranslate.onLanguageChanged
                 description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_logs_browse.png"
+                imageSource: "images/dropdown/ic_logs_browse.png"
                 value: "requested"
             }
             
@@ -64,7 +64,7 @@ Page
                 id: blockedFilter
                 text: qsTr("Blocked") + Retranslate.onLanguageChanged
                 description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/ic_logs_blocked.png"
+                imageSource: "images/dropdown/ic_logs_blocked.png"
                 value: "blocked"
             }
             

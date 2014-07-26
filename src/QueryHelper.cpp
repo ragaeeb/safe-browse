@@ -5,6 +5,23 @@
 #include "Persistance.h"
 #include "QueryId.h"
 
+namespace {
+
+QString extractHost(QUrl const& domain)
+{
+    QStringList tokens = domain.host().split(".");
+    int n = tokens.size();
+
+    if (n > 1) {
+        tokens.takeFirst(); // remove www
+        return tokens.join(".");
+    } else {
+        return "";
+    }
+}
+
+}
+
 namespace safebrowse {
 
 using namespace canadainc;
@@ -29,16 +46,11 @@ void QueryHelper::analyze(QObject* caller, QUrl const& domain)
 {
     LOGGER(domain);
 
-    QStringList tokens = domain.host().split(".");
-    LOGGER(tokens);
-    int n = tokens.size();
+    QString host = extractHost(domain);
 
-    if (n > 1)
+    if ( !host.isEmpty() )
     {
         m_sql.executeQuery(caller, "INSERT INTO logs (action,comment) VALUES ('requested',?)", QueryId::LogRequest, QVariantList() << domain.toString() );
-
-        tokens.takeFirst(); // remove www
-        QString host = tokens.join(".");
         m_sql.executeQuery(caller, QString("SELECT uri FROM %1 WHERE uri=? LIMIT 1").arg(m_mode), QueryId::LookupDomain, QVariantList() << host );
     }
 }
@@ -112,6 +124,18 @@ bool QueryHelper::initDatabase()
     settingChanged("mode");
 
     return true;
+}
+
+
+void QueryHelper::safeRunSite(QObject* caller, QUrl const& domain)
+{
+    LOGGER(domain);
+
+    QString host = extractHost(domain);
+
+    if ( !host.isEmpty() ) {
+        blockSite(caller, m_mode, host);
+    }
 }
 
 
