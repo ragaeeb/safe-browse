@@ -56,7 +56,7 @@ NavigationPane
             ActionItem {
                 title: qsTr("Browse") + Retranslate.onLanguageChanged
                 imageSource: "images/ic_globe.png"
-                ActionBar.placement: ActionBarPlacement.OnBar
+                ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
                 
                 onTriggered: {
                     prompt.show();

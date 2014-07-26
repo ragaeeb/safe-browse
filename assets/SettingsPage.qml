@@ -25,7 +25,7 @@ Page
             id: addAction
             imageSource: "images/ic_add.png"
             title: qsTr("Add") + Retranslate.onLanguageChanged
-            ActionBar.placement: ActionBarPlacement.OnBar
+            ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
             
             onTriggered: {
                 console.log("UserEvent: AddSiteTriggered");
