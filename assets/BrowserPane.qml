@@ -1,5 +1,5 @@
 import bb.cascades 1.0
-import bb.system 1.0
+import bb.system 1.2
 import com.canadainc.data 1.0
 
 NavigationPane
@@ -8,10 +8,6 @@ NavigationPane
     property alias target: detailsView.url
     property bool showClose: false
     signal closeTab();
-    
-    onTargetChanged: {
-        console.log("*** TARGET CHANGED TO", target);
-    }
     
     function promptForAddress() {
         prompt.show();
@@ -25,6 +21,19 @@ NavigationPane
     
     onPopTransitionEnded: {
         page.destroy();
+    }
+    
+    function onDataLoaded(id, data)
+    {
+        var mode = helper.mode;
+        
+        if ( id == QueryId.LookupDomain && ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) )
+        {
+            var uri = detailsView.url.toString();
+            detailsView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
+            
+            helper.logBlocked(navigationPane, uri);
+        }
     }
     
     Page
@@ -61,11 +70,15 @@ NavigationPane
                         confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
                         cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
                         inputField.defaultText: "http://www."
+                        inputOptions: SystemUiInputOption.None
+                        inputField.emptyText: qsTr("URL cannot be empty...") + Retranslate.onLanguageChanged
                         
                         onFinished: {
-                            if (result == SystemUiResult.ConfirmButtonSelection) {
-                                var request = prompt.inputFieldTextEntry();
-                                request = request.replace(/^\s+|\s+$/g, "");
+                            console.log( "UserEvent: UrlEnteredPrompt", value, prompt.inputFieldTextEntry() );
+                            
+                            if (value == SystemUiResult.ConfirmButtonSelection)
+                            {
+                                var request = prompt.inputFieldTextEntry().trim();
                                 
                                 if (request.indexOf("http://") != 0) {
                                     request = "http://" + request;
@@ -132,19 +145,9 @@ NavigationPane
                         progressIndicator.value = loadProgress / 100.0
                         navigationPane.parent.unreadContentCount = 100-loadProgress;
                     }
-                    
+
                     onUrlChanged: {
-                        var urlValue = url.toString();
-                        console.log("************ CURRENT URL", urlValue);
-                        
-                        if ( urlValue.indexOf("http") == 0 || urlValue.indexOf("https") == 0 )
-                        {
-                            urlValue = uriUtil.removeProtocol(urlValue);
-                            var domain = urlValue.substring( 0, urlValue.indexOf("/") );
-                            
-                            requested = url;
-                            app.analyze(domain);
-                        }
+                        helper.analyze(navigationPane, url);
                     }
                     
                     onTitleChanged: {
@@ -164,31 +167,6 @@ NavigationPane
                             progressIndicator.state = ProgressIndicatorState.Error;
                         }
                     }
-                    
-                    function onDataLoaded(id, data)
-                    {
-                        if (id == QueryId.LookupDomain)
-                        {
-                            var mode = persist.getValueFor("mode");
-                            
-                            if ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) {
-                                var uri = url.toString();
-                                html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
-                                
-                                app.logBlocked(uri);
-                            }
-                        }
-                    }
-                    
-                    onCreationCompleted: {
-                        helper.dataLoaded.connect(onDataLoaded);
-                    }
-                    
-                    attachedObjects: [
-                        UriUtil {
-                            id: uriUtil
-                        }
-                    ]
                 }
             }
             

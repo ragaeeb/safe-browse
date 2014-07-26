@@ -13,40 +13,55 @@ QueryHelper::QueryHelper(Persistance* persist) :
         m_sql(DATABASE_PATH), m_persist(persist)
 {
     connect( persist, SIGNAL( settingChanged(QString const&) ), this, SLOT( settingChanged(QString const&) ), Qt::QueuedConnection );
-    connect( &m_sql, SIGNAL( dataLoaded(int, QVariant const&) ), this, SLOT( dataLoaded(int, QVariant const&) ), Qt::QueuedConnection );
-}
-
-
-void QueryHelper::dataLoaded(int id, QVariant const& data)
-{
-
 }
 
 
 void QueryHelper::settingChanged(QString const& key)
 {
-    Q_UNUSED(key);
+    if (key == "mode") {
+        m_mode = m_persist->getValueFor("mode").toString();
+        emit modeChanged();
+    }
 }
 
 
-void QueryHelper::analyze(QString const& domain)
+void QueryHelper::analyze(QObject* caller, QUrl const& domain)
 {
-    /*
-    QString mode = m_persist->getValueFor("mode").toString();
-    m_sql.setQuery( QString("SELECT * FROM %1 WHERE uri=? LIMIT 1").arg(mode) );
-    QVariantList params = QVariantList() << domain;
-    m_sql.executePrepared(params, QueryId::LookupDomain);
+    LOGGER(domain);
 
-    m_sql.setQuery( QString("INSERT INTO logs (action,comment) VALUES ('%1',?)").arg("requested") );
-    m_sql.executePrepared(params, QueryId::LogRequest); */
+    QStringList tokens = domain.host().split(".");
+    int n = tokens.size();
+
+    if (n > 1)
+    {
+        m_sql.executeQuery(caller, "INSERT INTO logs (action,comment) VALUES ('requested',?)", QueryId::LogRequest, QVariantList() << domain.toString() );
+
+        QString host = QString("%1.%2").arg( tokens.takeLast() ).arg( tokens.takeLast() );
+        m_sql.executeQuery(caller, QString("SELECT uri FROM %1 WHERE uri=? LIMIT 1").arg(m_mode), QueryId::LookupDomain, QVariantList() << host );
+    }
 }
 
 
-void QueryHelper::logBlocked(QString const& uri)
+void QueryHelper::clearAllLogs(QObject* caller)
 {
-    /*
-    m_sql.setQuery( QString("INSERT INTO logs (action,comment) VALUES ('%1',?)").arg("blocked") );
-    m_sql.executePrepared( QVariantList() << uri, QueryId::LogBlocked ); */
+    LOGGER("clearAllLogs");
+    m_sql.executeQuery(caller, "DELETE from logs", QueryId::ClearLogs);
+}
+
+
+void QueryHelper::fetchAllLogs(QObject* caller, QString const& filterAction)
+{
+    LOGGER(filterAction);
+
+    QString query = filterAction.isEmpty() ? "SELECT * from logs" : QString("SELECT * from logs WHERE action='%1'").arg(filterAction);
+    m_sql.executeQuery(caller, query, QueryId::GetLogs);
+}
+
+
+void QueryHelper::logBlocked(QObject* caller, QString const& uri)
+{
+    LOGGER(uri);
+    m_sql.executeQuery(caller, QString("INSERT INTO logs (action,comment) VALUES ('blocked',?)"), QueryId::LogBlocked, QVariantList() << uri);
 }
 
 
@@ -83,8 +98,8 @@ bool QueryHelper::initDatabase()
     if ( !databaseReady() )
     {
         QStringList qsl;
-        qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE controlled (uri TEXT PRIMARY KEY)";
+        qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
 
         m_sql.initSetup(NULL, qsl, QueryId::Setup);
@@ -92,7 +107,14 @@ bool QueryHelper::initDatabase()
         return false;
     }
 
+    settingChanged("mode");
+
     return true;
+}
+
+
+QString QueryHelper::mode() const {
+    return m_mode;
 }
 
 

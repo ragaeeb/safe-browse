@@ -2,17 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.0">
 <context>
-    <name>AuthenticationContainer</name>
-    <message>
-        <source>Login</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wrong password entered. Please try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>BrowserPane</name>
     <message>
         <source>Back</source>
@@ -50,38 +39,8 @@
         <source>Close Tab</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>BrowsingModeDropDown</name>
     <message>
-        <source>Browsing Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Passive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Allow all sites except certain ones</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Controlled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Block all sites except certain ones</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>EntriesListView</name>
-    <message>
-        <source>Safe Browse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remove</source>
+        <source>URL cannot be empty...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -156,40 +115,72 @@ There is a lot of great and educational content on the web. However, there is al
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter the homepage address (ie: http://abdurrahman.org)</source>
+        <source>Successfully set homepage to %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Successfully set homepage to %1</source>
+        <source>Browsing Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allow all sites except certain ones</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Controlled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Block all sites except certain ones</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter your password:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password cannot be empty...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wrong password entered. Please try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Safe Browse</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the homepage address (ie: http://learnaboutislam.co.uk)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All websites will be allowed except the ones you choose to block.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All websites will be blocked except the ones you choose to allow.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There are no websites currently blocked. Tap here to add one.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>ViewLogsSheet</name>
-    <message>
-        <source>Clear Logs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Confirmation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Are you sure you want to clear all logs?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed Login</source>
-        <translation type="unfinished"></translation>
-    </message>
+    <name>ViewLogsPage</name>
     <message>
         <source>Action</source>
         <translation type="unfinished"></translation>
@@ -219,11 +210,27 @@ There is a lot of great and educational content on the web. However, there is al
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>View Logs</source>
+        <source>Blocked</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Close</source>
+        <source>Clear Logs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirmation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to clear all logs?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is not activity currently recorded.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed Login</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -235,11 +242,7 @@ There is a lot of great and educational content on the web. However, there is al
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Blocked</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cleared log!</source>
+        <source>View Logs</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -263,6 +266,14 @@ There is a lot of great and educational content on the web. However, there is al
     </message>
     <message>
         <source>Tab %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

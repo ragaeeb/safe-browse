@@ -8,10 +8,7 @@ TabbedPane
     property variant target
     
     onTargetChanged: {
-        console.log("*** ZZKJ", target);
         activePane.target = target;
-        console.log("*** ZZKJ2", target);
-        //activePane.target = target;
     }
     
     Menu.definition: CanadaIncMenu
