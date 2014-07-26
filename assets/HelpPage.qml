@@ -17,7 +17,7 @@ Page
         ActionItem {
             title: qsTr("Parental Control") + Retranslate.onLanguageChanged
             imageSource: "images/ic_instructions.png"
-            ActionBar.placement: ActionBarPlacement.OnBar
+            ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
 
             onTriggered: {
                 var page = instructionsDefinition.createObject();
