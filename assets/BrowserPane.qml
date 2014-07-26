@@ -36,7 +36,10 @@ NavigationPane
         {
             var uri = browsePage.webView.url.toString();
             browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
-            
+            helper.logBlocked(navigationPane, uri);
+        } else if (id == QueryId.LookupKeywords && data.length > 0) {
+            var uri = browsePage.webView.url.toString();
+            browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
             helper.logBlocked(navigationPane, uri);
         }
     }
@@ -55,6 +58,7 @@ NavigationPane
         
         webView.onTitleChanged: {
             navigationPane.parent.description = title;
+            helper.analyzeKeywords(navigationPane, title);
         }
         
         actions: [

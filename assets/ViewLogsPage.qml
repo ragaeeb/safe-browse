@@ -3,6 +3,7 @@ import com.canadainc.data 1.0
 
 Page
 {
+    id: viewLogPage
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     
     titleBar: TitleBar {
@@ -17,6 +18,7 @@ Page
                 var result = persist.showBlockingDialog( qsTr("Confirmation"), qsTr("Are you sure you want to clear all logs?") );
                 
                 if (result) {
+                    helper.clearAllLogs(viewLogPage);
                     adm.clear();
                     noElements.delegateActive = true;
                 }

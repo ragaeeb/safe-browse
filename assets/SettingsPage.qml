@@ -8,13 +8,6 @@ Page
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     titleBar: SafeTitleBar {}
     
-    function showSheet(sheetSource)
-    {
-        definition.source = sheetSource;
-        var sheet = definition.createObject();
-        sheet.open();
-    }
-    
     onCreationCompleted: {
         loginPrompt.show();
     }
@@ -145,7 +138,22 @@ Page
             
             onTriggered: {
                 console.log("UserEvent: ChangePasswordTriggered");
-                dashPage.showSheet("SignupSheet.qml");
+                definition.source = "SignupSheet.qml";
+                var sheet = definition.createObject();
+                sheet.open();
+            }
+        },
+        
+        ActionItem
+        {
+            imageSource: "images/menu/ic_keywords.png"
+            title: qsTr("Blocked Keywords") + Retranslate.onLanguageChanged
+            
+            onTriggered: {
+                console.log("UserEvent: BlockedKeywordsTriggered");
+                definition.source = "BlockedKeywordPage.qml";
+                var keywords = definition.createObject();
+                dashPage.parent.push(keywords);
             }
         },
         
