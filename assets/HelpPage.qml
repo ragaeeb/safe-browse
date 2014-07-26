@@ -11,6 +11,18 @@ Page
     }
     
     actions: [
+        ActionItem
+        {
+            imageSource: "file:///usr/share/icons/bb_action_openbbmchannel.png"
+            title: atb.channelTitle
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onTriggered: {
+                console.log("UserEvent: OpenChannelTriggered");
+                persist.openChannel();
+            }
+        },
+        
         ActionItem {
             title: qsTr("Parental Control") + Retranslate.onLanguageChanged
             imageSource: "images/ic_instructions.png"

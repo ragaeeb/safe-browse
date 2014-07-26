@@ -23,7 +23,7 @@ Page
         ActionItem
         {
             id: addAction
-            imageSource: "images/ic_add.png"
+            imageSource: "images/menu/ic_add.png"
             title: qsTr("Add") + Retranslate.onLanguageChanged
             ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
             
@@ -106,6 +106,40 @@ Page
         
         ActionItem
         {
+            imageSource: "images/menu/ic_safe_run.png"
+            title: qsTr("Safe Run") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            function onPopTransitionEnded(page)
+            {
+                if (dashPage.parent.top == dashPage) {
+                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
+                }
+            }
+            
+            onTriggered: {
+                console.log("UserEvent: SafeRunTriggered");
+                var message;
+                
+                if (helper.mode == "passive") {
+                    message = qsTr("Go through and browse all the pages that you want to block. They will be added one by one automatically. When you finish simply close the page.");
+                } else {
+                    message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
+                }
+                
+                persist.showBlockingToast( message, qsTr("OK"), "asset:///images/menu/ic_safe_run.png" );
+                
+                definition.source = "SafeRunPage.qml";
+                var safeRun = definition.createObject();
+                dashPage.parent.push(safeRun);
+                
+                safeRun.targetPrompt.show();
+                dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
+            }
+        },
+        
+        ActionItem
+        {
             imageSource: "images/ic_password.png"
             title: qsTr("Change Password") + Retranslate.onLanguageChanged
             
@@ -173,23 +207,23 @@ Page
                 text: qsTr("Passive") + Retranslate.onLanguageChanged
                 description: qsTr("Allow all sites except certain ones") + Retranslate.onLanguageChanged
                 value: "passive"
-                imageSource: "images/ic_passive.png"
+                imageSource: "images/dropdown/ic_passive.png"
             }
             
             Option {
                 text: qsTr("Controlled") + Retranslate.onLanguageChanged
                 description: qsTr("Block all sites except certain ones") + Retranslate.onLanguageChanged
                 value: "controlled"
-                imageSource: "images/ic_controlled.png"
+                imageSource: "images/dropdown/ic_controlled.png"
             }
             
             onValueChanged: {
                 if (diff)
                 {
                     if (selectedValue == "passive") {
-                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "", "asset:///images/ic_passive.png" );
+                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "", "asset:///images/dropdown/ic_passive.png" );
                     } else if (selectedValue == "controlled") {
-                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "", "asset:///images/ic_controlled.png" );
+                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "", "asset:///images/dropdown/ic_controlled.png" );
                     }
                 }
                 
