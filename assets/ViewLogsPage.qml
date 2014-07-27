@@ -15,6 +15,8 @@ Page
             title: qsTr("Clear Logs") + Retranslate.onLanguageChanged
             
             onTriggered: {
+                console.log("UserEvent: ClearLogsTriggered");
+                
                 var result = persist.showBlockingDialog( qsTr("Confirmation"), qsTr("Are you sure you want to clear all logs?") );
                 
                 if (result) {

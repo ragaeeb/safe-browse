@@ -29,6 +29,8 @@ TabbedPane
         imageSource: "images/tabs/ic_new_tab.png"
         
         onTriggered: {
+            console.log("UserEvent: NewTabTriggered");
+            
             var newDoc = newDefinition.createObject();
             root.add(newDoc);
             

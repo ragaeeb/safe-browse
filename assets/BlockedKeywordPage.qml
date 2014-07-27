@@ -60,7 +60,7 @@ Page
                         
                         onValueChanged: {
                             var actualValue = Math.floor(value);
-                            var changed = persist.saveValueFor("keywordThreshold", actualValue, false);
+                            var changed = persist.saveValueFor("keywordThreshold", actualValue);
                             thresholdLabel.text = qsTr("Threshold: %1").arg(actualValue);
                         }
                     }

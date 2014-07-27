@@ -31,7 +31,7 @@ namespace safebrowse {
 using namespace canadainc;
 
 QueryHelper::QueryHelper(Persistance* persist) :
-        m_sql(DATABASE_PATH), m_persist(persist)
+        m_sql(DATABASE_PATH), m_persist(persist), m_threshold(1)
 {
     connect( persist, SIGNAL( settingChanged(QString const&) ), this, SLOT( settingChanged(QString const&) ), Qt::QueuedConnection );
 }
@@ -41,7 +41,8 @@ void QueryHelper::settingChanged(QString const& key)
 {
     if (key == "mode") {
         m_mode = m_persist->getValueFor("mode").toString();
-        emit modeChanged();
+    } else if (key == "keywordThreshold") {
+        m_threshold = m_persist->getValueFor("keywordThreshold").toInt();
     }
 }
 
@@ -71,6 +72,14 @@ void QueryHelper::clearAllLogs(QObject* caller)
 {
     LOGGER("clearAllLogs");
     m_sql.executeQuery(caller, "DELETE from logs", QueryId::ClearLogs);
+}
+
+
+void QueryHelper::clearCache(QObject* caller)
+{
+    if ( m_persist->clearCache() ) {
+        m_sql.executeQuery(caller, "VACUUM", QueryId::ClearCache);
+    }
 }
 
 
@@ -142,7 +151,7 @@ void QueryHelper::blockSite(QObject* caller, QString const& mode, QString uri)
 void QueryHelper::fetchAllBlocked(QObject* caller, QString const& mode)
 {
     LOGGER(mode);
-    m_sql.executeQuery( caller, QString("SELECT uri FROM %1").arg(mode), QueryId::GetAll );
+    m_sql.executeQuery( caller, QString("SELECT uri FROM %1 ORDER BY uri").arg(mode), QueryId::GetAll );
 }
 
 
@@ -186,6 +195,7 @@ bool QueryHelper::initDatabase()
     }
 
     settingChanged("mode");
+    settingChanged("keywordThreshold");
 
     return true;
 }
@@ -256,6 +266,11 @@ void QueryHelper::analyzeKeywords(QObject* caller, QString const& title)
 
 QString QueryHelper::mode() const {
     return m_mode;
+}
+
+
+int QueryHelper::threshold() const {
+    return m_threshold;
 }
 
 
