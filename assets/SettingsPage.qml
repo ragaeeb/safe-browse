@@ -283,6 +283,45 @@ Page
                 id: adm
             }
             
+            onTriggered: {
+                console.log("UserEvent: BlockedListItem Tapped", indexPath);
+                multiSelectHandler.active = true;
+                toggleSelection(indexPath);
+            }
+            
+            multiSelectHandler
+            {
+                actions: [
+                    DeleteActionItem 
+                    {
+                        id: unblockAction
+                        title: qsTr("Unblock") + Retranslate.onLanguageChanged
+                        imageSource: "images/menu/ic_unblock.png"
+                        enabled: false
+                        
+                        onTriggered: {
+                            console.log("UserEvent: UnblockMultiSenders");
+                            var selected = listView.selectionList();
+                            var blocked = [];
+                            
+                            for (var i = selected.length-1; i >= 0; i--) {
+                                blocked.push( adm.data(selected[i]) );
+                            }
+                            
+                            helper.unblockSite(listView, modeDropDown.selectedValue, blocked);
+                        }
+                    }
+                ]
+                
+                status: qsTr("None selected") + Retranslate.onLanguageChanged
+            }
+            
+            onSelectionChanged: {
+                var n = selectionList().length;
+                unblockAction.enabled = n > 0;
+                multiSelectHandler.status = qsTr("%n senders to unblock", "", n);
+            }
+            
             listItemComponents:
             [
                 ListItemComponent
@@ -292,22 +331,6 @@ Page
                         id: rootItem
                         imageSource: "images/ic_browse.png";
                         description: ListItemData.uri
-                        
-                        contextActions: [
-                            ActionSet {
-                                title: qsTr("Safe Browse") + Retranslate.onLanguageChanged;
-                                subtitle: rootItem.description;
-                                
-                                DeleteActionItem {
-                                    title: qsTr("Remove") + Retranslate.onLanguageChanged
-                                    
-                                    onTriggered: {
-                                        console.log("UserEvent: RemoveBlockedSite");
-                                        rootItem.ListItem.view.remove(ListItemData);
-                                    }
-                                }
-                            }
-                        ]
                         
                         ListItem.onInitializedChanged: {
                             if (initialized) {
@@ -341,10 +364,6 @@ Page
                     }
                 }
             ]
-
-            function remove(ListItemData) {
-                helper.unblockSite(listView, modeDropDown.selectedValue, ListItemData.uri);
-            }
 
             function onDataLoaded(id, data)
             {

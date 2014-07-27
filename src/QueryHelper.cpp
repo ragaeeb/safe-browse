@@ -146,10 +146,19 @@ void QueryHelper::fetchAllBlocked(QObject* caller, QString const& mode)
 }
 
 
-void QueryHelper::unblockSite(QObject* caller, QString const& mode, QString const& uri)
+void QueryHelper::unblockSite(QObject* caller, QString const& mode, QVariantList const& uris)
 {
-    LOGGER(mode << uri);
-    m_sql.executeQuery(caller, QString("DELETE FROM %1 WHERE uri=?").arg(mode), QueryId::DeleteEntry, QVariantList() << uri);
+    LOGGER(mode << uris);
+
+    QStringList placeHolders;
+    QVariantList values;
+
+    foreach (QVariant const& uri, uris) {
+        placeHolders << "?";
+        values << uri.toMap().value("uri").toString();
+    }
+
+    m_sql.executeQuery(caller, QString("DELETE FROM %1 WHERE uri IN (%2)").arg(mode).arg( placeHolders.join(",") ), QueryId::DeleteEntry, values);
 }
 
 
