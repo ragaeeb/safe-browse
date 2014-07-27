@@ -23,6 +23,18 @@ Page
             }
         },
         
+        ActionItem
+        {
+            imageSource: "images/menu/ic_video_tutorial.png"
+            title: qsTr("Video Tutorial") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onTriggered: {
+                console.log("UserEvent: VideoTutorialTriggered");
+                persist.tutorialVideo("http://youtu.be/Lt1SMGO2iOw", false);
+            }
+        },
+        
         ActionItem {
             title: qsTr("Parental Control") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_parents.png"
