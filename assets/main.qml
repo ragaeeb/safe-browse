@@ -16,6 +16,7 @@ TabbedPane
         id: menuDef
         help.imageSource: "images/menu/ic_help.png"
         help.title: qsTr("Help") + Retranslate.onLanguageChanged
+        labelColor: 'Signature' in ActionBarPlacement ? Color.Black : Color.White
         projectName: "safe-browse"
         settings.imageSource: "images/menu/ic_settings.png"
         settings.title: qsTr("Settings") + Retranslate.onLanguageChanged

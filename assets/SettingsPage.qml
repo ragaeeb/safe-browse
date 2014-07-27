@@ -321,7 +321,7 @@ Page
             onSelectionChanged: {
                 var n = selectionList().length;
                 unblockAction.enabled = n > 0;
-                multiSelectHandler.status = qsTr("%n senders to unblock", "", n);
+                multiSelectHandler.status = qsTr("%n addresses to remove", "", n);
             }
             
             listItemComponents:
