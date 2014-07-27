@@ -30,6 +30,7 @@ Page
             ]
             
             onTriggered: {
+                console.log("UserEvent: GoBack");
                 detailsView.goBack();
             }
         },
@@ -40,6 +41,7 @@ Page
             ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
             
             onTriggered: {
+                console.log("UserEvent: BrowseTriggered");
                 prompt.show();
             }
             
@@ -85,6 +87,7 @@ Page
             ]
             
             onTriggered: {
+                console.log("UserEvent: GoForward");
                 detailsView.goForward();
             }
         },
@@ -100,10 +103,10 @@ Page
             ]
             
             onTriggered: {
-                if (target == "local:///") {
-                    detailsView.url = detailsView.requested;
-                } else {
-                    detailsView.reload();
+                console.log("UserEvent: RefreshTriggered");
+                
+                if ( detailsView.url.toString() != "local:///" ) {
+                    detailsView.urlChanged(detailsView.url);
                 }
             }
         }

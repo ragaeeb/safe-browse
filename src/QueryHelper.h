@@ -16,11 +16,13 @@ using namespace canadainc;
 class QueryHelper : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(QString mode READ mode NOTIFY modeChanged)
+	Q_PROPERTY(QString mode READ mode FINAL)
+	Q_PROPERTY(int threshold READ threshold FINAL)
 
 	DatabaseHelper m_sql;
 	Persistance* m_persist;
 	QString m_mode;
+	int m_threshold;
 
 signals:
     void modeChanged();
@@ -34,12 +36,14 @@ public:
 
     bool initDatabase();
     QString mode() const;
+    int threshold() const;
     Q_INVOKABLE void analyze(QObject* caller, QUrl const& domain);
     Q_INVOKABLE void analyzeKeywords(QObject* caller, QString const& title);
     Q_INVOKABLE QStringList blockKeywords(QObject* caller, QVariantList const& keywords);
     Q_INVOKABLE void blockSite(QObject* caller, QString const& mode, QString uri);
     Q_INVOKABLE void clearAllLogs(QObject* caller);
     Q_INVOKABLE void clearBlockedKeywords(QObject* caller);
+    Q_INVOKABLE void clearCache(QObject* caller);
     Q_INVOKABLE void fetchAllBlocked(QObject* caller, QString const& mode);
     Q_INVOKABLE void fetchAllBlockedKeywords(QObject* caller);
     Q_INVOKABLE void fetchAllLogs(QObject* caller, QString const& filterAction=QString());

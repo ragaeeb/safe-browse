@@ -28,19 +28,21 @@ NavigationPane
         page.destroy();
     }
     
+    function showBlockedPage()
+    {
+        var uri = browsePage.webView.url.toString();
+        browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
+        helper.logBlocked(navigationPane, uri);
+    }
+    
     function onDataLoaded(id, data)
     {
         var mode = helper.mode;
         
-        if ( id == QueryId.LookupDomain && ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) )
-        {
-            var uri = browsePage.webView.url.toString();
-            browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
-            helper.logBlocked(navigationPane, uri);
-        } else if (id == QueryId.LookupKeywords && data.length > 0) {
-            var uri = browsePage.webView.url.toString();
-            browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Blocked: %1!</body></html>".arg(uri);
-            helper.logBlocked(navigationPane, uri);
+        if ( id == QueryId.LookupDomain && ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) ) {
+            showBlockedPage();
+        } else if (id == QueryId.LookupKeywords && data.length >= helper.threshold) {
+            showBlockedPage();
         }
     }
     
@@ -72,8 +74,8 @@ NavigationPane
                     console.log("UserEvent: PinToHomeScreenTriggered");
                     
                     shortcut.active = true;
-                    shortcut.object.defaultTitle = detailsView.title;
-                    shortcut.object.urlToPin = detailsView.url;
+                    shortcut.object.defaultTitle = browsePage.webView.title;
+                    shortcut.object.urlToPin = browsePage.webView.url;
                     shortcut.object.openPinPrompt();
                 }
                 

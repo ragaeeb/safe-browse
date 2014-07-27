@@ -84,6 +84,7 @@ void ApplicationUI::init(QString const& qmlDoc)
 
 void ApplicationUI::lazyInit()
 {
+    INIT_SETTING("keywordThreshold", 1);
     INIT_SETTING("mode", "passive");
     INIT_SETTING("home", "http://canadainc.org");
 
@@ -139,6 +140,8 @@ void ApplicationUI::lazyInit()
     }
 
     AppLogFetcher::create( new SafeBrowseCollector(), this );
+
+    if ( !InvocationUtils::validateSharedFolderAccess( tr("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select OK to launch the Application Permissions screen where you can turn these settings on.") ) ) {}
 }
 
 
