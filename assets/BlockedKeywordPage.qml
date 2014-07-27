@@ -74,7 +74,7 @@ Page
             id: addAction
             title: qsTr("Add") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_add.png"
-            ActionBar.placement: ActionBarPlacement.OnBar
+            ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
             
             shortcuts: [
                 SystemShortcut {
