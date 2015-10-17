@@ -178,7 +178,6 @@ bool QueryHelper::initDatabase()
         QStringList qsl;
         qsl << "CREATE TABLE controlled (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
-        qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
         qsl << "CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
         qsl << "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )";
 
