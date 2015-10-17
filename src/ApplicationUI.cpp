@@ -268,6 +268,28 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
 }
 
 
+bool Persistance::clearCache()
+{
+    bool clear = showBlockingDialog( tr("Confirmation"), tr("Are you sure you want to clear the cache?") );
+
+    if (clear) {
+        QFutureWatcher<void>* qfw = new QFutureWatcher<void>(this);
+        connect( qfw, SIGNAL( finished() ), this, SLOT( cacheCleared() ) );
+
+        QFuture<void> future = QtConcurrent::run(&IOUtils::clearAllCache);
+        qfw->setFuture(future);
+    }
+
+    return clear;
+}
+
+
+void Persistance::cacheCleared() {
+    showToast( tr("Cache was successfully cleared!"), "file:///usr/share/icons/bb_action_delete.png" );
+}
+
+
+
 QString ApplicationUI::renderStandardTime(QDateTime const& theTime) {
     return LocaleUtil::renderStandardTime(theTime);
 }
