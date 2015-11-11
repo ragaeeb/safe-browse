@@ -1,16 +1,15 @@
 #include "precompiled.h"
 
 #include "applicationui.hpp"
+#include "AppLogFetcher.h" // needed for constants only
 #include "CardUtils.h"
 #include "InvocationUtils.h"
 #include "IOUtils.h"
-#include "LocaleUtil.h"
 #include "Logger.h"
-#include "LogMonitor.h"
 #include "QueryId.h"
 #include "QueryHelper.h"
-#include "SafeBrowseCollector.h"
 #include "TextUtils.h"
+#include "ThreadUtils.h"
 
 #define CARD_KEY "logCard"
 #define TARGET_SHORTCUT "com.canadainc.SafeBrowse.shortcut"
@@ -37,32 +36,30 @@ using namespace bb::cascades;
 using namespace bb::system;
 using namespace canadainc;
 
-ApplicationUI::ApplicationUI(bb::cascades::Application *app) :
-        QObject(app), m_account(&m_persistance), m_sceneCover("Cover.qml"),
+ApplicationUI::ApplicationUI(bb::system::InvokeManager* im) :
+        m_persistance(im), m_account(&m_persistance),
+        m_sceneCover( im->startupMode() != ApplicationStartupMode::InvokeCard, this ),
         m_helper(&m_persistance), m_root(NULL)
 {
-    INIT_SETTING(CARD_KEY, true);
-    INIT_SETTING(UI_KEY, true);
-
-    switch ( m_invokeManager.startupMode() )
+    switch ( im->startupMode() )
     {
         case ApplicationStartupMode::LaunchApplication:
-            LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
             init("main.qml");
             break;
 
         case ApplicationStartupMode::InvokeCard:
-            LogMonitor::create(CARD_KEY, CARD_LOG_FILE, this);
-            connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
+            connect( im, SIGNAL( cardPooled(bb::system::CardDoneMessage const&) ), QCoreApplication::instance(), SLOT( quit() ) );
+            connect( im, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
         case ApplicationStartupMode::InvokeApplication:
-            LogMonitor::create(UI_KEY, UI_LOG_FILE, this);
-            connect( &m_invokeManager, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
+            connect( im, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
 
         default:
             break;
     }
+
+    connect( im, SIGNAL( childCardDone(bb::system::CardDoneMessage const&) ), this, SLOT( childCardDone(bb::system::CardDoneMessage const&) ) );
 }
 
 
@@ -73,7 +70,6 @@ void ApplicationUI::init(QString const& qmlDoc)
     QMap<QString, QObject*> context;
     context.insert("security", &m_account);
     context.insert("helper", &m_helper);
-    context.insert("app", this);
     context.insert("network", &m_network);
 
     LOGGER("Instantiate" << qmlDoc);
@@ -84,12 +80,11 @@ void ApplicationUI::init(QString const& qmlDoc)
 
 void ApplicationUI::lazyInit()
 {
+    disconnect( this, SIGNAL( initialize() ), this, SLOT( lazyInit() ) ); // in case we get invoked again
+
     INIT_SETTING("keywordThreshold", 1);
     INIT_SETTING("mode", "passive");
     INIT_SETTING("home", "http://canadainc.org");
-
-    connect( &m_network, SIGNAL( downloadProgress(QVariant const&, qint64, qint64) ), this, SLOT( progress(QVariant const&, qint64, qint64) ) );
-    connect( &m_network, SIGNAL( requestComplete(QVariant const&, QByteArray const&) ), this, SLOT( requestComplete(QVariant const&, QByteArray const&) ) );
 
     m_helper.initDatabase();
 
@@ -97,6 +92,9 @@ void ApplicationUI::lazyInit()
 
     if ( !target.isNull() )
     {
+        connect( &m_network, SIGNAL( downloadProgress(QVariant const&, qint64, qint64) ), this, SLOT( progress(QVariant const&, qint64, qint64) ) );
+        connect( &m_network, SIGNAL( requestComplete(QVariant const&, QByteArray const&, bool) ), this, SLOT( requestComplete(QVariant const&, QByteArray const&, bool) ) );
+
         QUrl uri = m_request.uri();
         QString url = uri.toString();
 
@@ -139,9 +137,10 @@ void ApplicationUI::lazyInit()
         m_root->setProperty("target", home);
     }
 
-    AppLogFetcher::create( new SafeBrowseCollector(), this );
+    AppLogFetcher::create( &m_persistance, &ThreadUtils::compressFiles, this );
 
-    if ( !InvocationUtils::validateSharedFolderAccess( tr("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select OK to launch the Application Permissions screen where you can turn these settings on.") ) ) {}
+    emit lazyInitComplete();
+    //if ( !InvocationUtils::validateSharedFolderAccess( tr("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select OK to launch the Application Permissions screen where you can turn these settings on.") ) ) {}
 }
 
 
@@ -185,13 +184,27 @@ void ApplicationUI::invoked(bb::system::InvokeRequest const& request)
 }
 
 
-void ApplicationUI::requestComplete(QVariant const& cookie, QByteArray const& data)
+void ApplicationUI::childCardDone(bb::system::CardDoneMessage const& message)
 {
-    QFutureWatcher<QUrl>* qfw = new QFutureWatcher<QUrl>(this);
-    connect( qfw, SIGNAL( finished() ), this, SLOT( onFileWritten() ) );
+    LOGGER( message.data() );
+    emit childCardFinished( message.data(), message.reason().split("/").last() );
 
-    QFuture<QUrl> future = QtConcurrent::run(writeFile, cookie, data);
-    qfw->setFuture(future);
+    if ( !message.data().isEmpty() ) {
+        m_persistance.invokeManager()->sendCardDone(message);
+    }
+}
+
+
+void ApplicationUI::requestComplete(QVariant const& cookie, QByteArray const& data, bool error)
+{
+    if (!error)
+    {
+        QFutureWatcher<QUrl>* qfw = new QFutureWatcher<QUrl>(this);
+        connect( qfw, SIGNAL( finished() ), this, SLOT( onFileWritten() ) );
+
+        QFuture<QUrl> future = QtConcurrent::run(writeFile, cookie, data);
+        qfw->setFuture(future);
+    }
 }
 
 
@@ -228,7 +241,7 @@ void ApplicationUI::invokeSystemApp(QUrl const& uri)
 
 
 void ApplicationUI::invokeSettingsApp() {
-    InvocationUtils::launchSettingsApp("childprotection");
+    m_persistance.launchSettingsApp("childprotection");
 }
 
 
@@ -252,25 +265,29 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
         bool added = bb::platform::HomeScreen().addShortcut( QUrl("asset:///images/icon_shortcut.png"), TextUtils::sanitize(label), uri);
 
         if (added) {
-            m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "", "asset:///images/icon_shortcut.png" );
+            m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "asset:///images/icon_shortcut.png" );
         } else {
-            m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
+            m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/error.png" );
 #if defined(QT_NO_DEBUG)
-        AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        Report r(ReportType::BugReportAuto);
+        r.params.insert(KEY_REPORT_NOTES, QString("[FailedAddHomeScreen1]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        AppLogFetcher::getInstance()->submitReport(r);
 #endif
         }
     } else {
-        m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "", "asset:///images/error.png" );
+        m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/error.png" );
 #if defined(QT_NO_DEBUG)
-        AppLogFetcher::getInstance()->submitLogs( QString("[SafeBrowse]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        Report r(ReportType::BugReportAuto);
+        r.params.insert(KEY_REPORT_NOTES, QString("[FailedAddHomeScreen2]: label,url=%1;%2").arg(label).arg( url.toString() ) );
+        AppLogFetcher::getInstance()->submitReport(r);
 #endif
     }
 }
 
-
+/*
 bool Persistance::clearCache()
 {
-    bool clear = showBlockingDialog( tr("Confirmation"), tr("Are you sure you want to clear the cache?") );
+    //bool clear = showBlockingDialog( tr("Confirmation"), tr("Are you sure you want to clear the cache?") );
 
     if (clear) {
         QFutureWatcher<void>* qfw = new QFutureWatcher<void>(this);
@@ -281,23 +298,22 @@ bool Persistance::clearCache()
     }
 
     return clear;
+    return true;
 }
 
 
 void Persistance::cacheCleared() {
-    showToast( tr("Cache was successfully cleared!"), "file:///usr/share/icons/bb_action_delete.png" );
+    //showToast( tr("Cache was successfully cleared!"), "file:///usr/share/icons/bb_action_delete.png" );
 }
 
+ */
 
-
-QString ApplicationUI::renderStandardTime(QDateTime const& theTime) {
-    return LocaleUtil::renderStandardTime(theTime);
+QString ApplicationUI::renderStandardTime(QDateTime const& theTime)
+{
+    static QString format = bb::utility::i18n::timeFormat(bb::utility::i18n::DateFormat::Short);
+    return m_timeRender.locale().toString(theTime, format);
 }
 
-
-void ApplicationUI::create(Application* app) {
-	new ApplicationUI(app);
-}
 
 ApplicationUI::~ApplicationUI()
 {

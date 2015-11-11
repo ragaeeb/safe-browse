@@ -7,13 +7,8 @@
 #include "Persistance.h"
 #include "QueryHelper.h"
 
-#include <bb/system/InvokeManager>
-
-namespace bb {
-	namespace cascades {
-		class Application;
-	}
-}
+#include <bb/system/CardDoneMessage>
+#include <bb/system/LocaleHandler>
 
 namespace safebrowse {
 
@@ -23,31 +18,34 @@ class ApplicationUI : public QObject
 {
 	Q_OBJECT
 
+    Persistance m_persistance;
 	AccountManager m_account;
 	LazySceneCover m_sceneCover;
-	Persistance m_persistance;
 	QueryHelper m_helper;
 	NetworkProcessor m_network;
 	QMap<QString, bool> m_extensions;
 	bb::system::InvokeManager m_invokeManager;
 	bb::system::InvokeRequest m_request;
 	QObject* m_root;
+	bb::system::LocaleHandler m_timeRender;
 
-    ApplicationUI(bb::cascades::Application *app);
     void init(QString const& qml);
 
 private slots:
+    void childCardDone(bb::system::CardDoneMessage const& message=bb::system::CardDoneMessage());
     void invoked(bb::system::InvokeRequest const& request);
     void lazyInit();
     void onFileWritten();
     void progress(QVariant const& cookie, qint64 bytesSent, qint64 bytesTotal);
-    void requestComplete(QVariant const& cookie, QByteArray const& data);
+    void requestComplete(QVariant const& cookie, QByteArray const& data, bool error);
 
 signals:
+    void childCardFinished(QString const& message, QString const& cookie);
     void initialize();
+    void lazyInitComplete();
 
 public:
-	static void create(bb::cascades::Application* app);
+    ApplicationUI(bb::system::InvokeManager* im);
     virtual ~ApplicationUI();
     Q_INVOKABLE void addToHomeScreen(QString const& label, QUrl const& url, QString icon);
     Q_INVOKABLE void invokeSettingsApp();
