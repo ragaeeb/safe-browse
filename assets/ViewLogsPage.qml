@@ -87,6 +87,7 @@ Page
         ListView
         {
             id: listView
+            scrollRole: ScrollRole.Main
             property variant localization: app
             verticalAlignment: VerticalAlignment.Fill
             horizontalAlignment: HorizontalAlignment.Fill

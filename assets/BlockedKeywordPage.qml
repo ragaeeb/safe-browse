@@ -171,6 +171,7 @@ Page
         ListView
         {
             id: listView
+            scrollRole: ScrollRole.Main
             
             dataModel: GroupDataModel
             {
