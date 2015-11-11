@@ -3,8 +3,6 @@
 
 #include "DatabaseHelper.h"
 
-#define DATABASE_PATH QString("%1/database.db").arg( QDir::homePath() )
-
 namespace canadainc {
 	class Persistance;
 }
@@ -28,7 +26,8 @@ signals:
     void modeChanged();
 
 private slots:
-    void settingChanged(QString const& key);
+    void onDataLoaded(QVariant id, QVariant data);
+    void onSettingChanged(QVariant value, QVariant key);
 
 public:
 	QueryHelper(Persistance* persist);
@@ -52,7 +51,6 @@ public:
     Q_INVOKABLE void safeRunSite(QObject* caller, QUrl const& domain);
     Q_INVOKABLE QStringList unblockKeywords(QObject* caller, QVariantList const& keywords);
     Q_INVOKABLE void unblockSite(QObject* caller, QString const& mode, QVariantList const& uris);
-    static bool databaseReady();
 };
 
 } /* namespace quran */

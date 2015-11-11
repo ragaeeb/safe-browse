@@ -1,6 +1,7 @@
 #include "precompiled.h"
 
 #include "QueryHelper.h"
+#include "CommonConstants.h"
 #include "Logger.h"
 #include "Persistance.h"
 #include "QueryId.h"
@@ -33,16 +34,17 @@ using namespace canadainc;
 QueryHelper::QueryHelper(Persistance* persist) :
         m_sql(DATABASE_PATH), m_persist(persist), m_threshold(1)
 {
-    connect( persist, SIGNAL( settingChanged(QString const&) ), this, SLOT( settingChanged(QString const&) ), Qt::QueuedConnection );
 }
 
 
-void QueryHelper::settingChanged(QString const& key)
+void QueryHelper::onSettingChanged(QVariant value, QVariant k)
 {
+    QString key = k.toString();
+
     if (key == "mode") {
-        m_mode = m_persist->getValueFor("mode").toString();
+        m_mode = value.toString();
     } else if (key == "keywordThreshold") {
-        m_threshold = m_persist->getValueFor("keywordThreshold").toInt();
+        m_threshold = value.toInt();
     }
 }
 
@@ -64,22 +66,20 @@ void QueryHelper::analyze(QObject* caller, QUrl const& domain)
 void QueryHelper::clearBlockedKeywords(QObject* caller)
 {
     LOGGER("clearAllKeywords");
-    m_sql.executeQuery(caller, "DELETE from keywords", QueryId::ClearKeywords);
+    m_sql.executeClear(caller, "keywords", QueryId::ClearKeywords);
 }
 
 
 void QueryHelper::clearAllLogs(QObject* caller)
 {
     LOGGER("clearAllLogs");
-    m_sql.executeQuery(caller, "DELETE from logs", QueryId::ClearLogs);
+    m_sql.executeClear(caller, "logs", QueryId::ClearLogs);
 }
 
 
 void QueryHelper::clearCache(QObject* caller)
 {
-    if ( m_persist->clearCache() ) {
-        m_sql.executeQuery(caller, "VACUUM", QueryId::ClearCache);
-    }
+    m_sql.executeQuery(caller, "VACUUM", QueryId::ClearCache);
 }
 
 
@@ -173,30 +173,24 @@ void QueryHelper::unblockSite(QObject* caller, QString const& mode, QVariantList
 
 bool QueryHelper::initDatabase()
 {
-    if ( !databaseReady() )
-    {
-        QStringList qsl;
-        qsl << "CREATE TABLE controlled (uri TEXT PRIMARY KEY)";
-        qsl << "CREATE TABLE passive (uri TEXT PRIMARY KEY)";
-        qsl << "CREATE TABLE logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
-        qsl << "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )";
+    QStringList qsl;
+    qsl << "CREATE TABLE IF NOT EXISTS controlled (uri TEXT PRIMARY KEY)";
+    qsl << "CREATE TABLE IF NOT EXISTS passive (uri TEXT PRIMARY KEY)";
+    qsl << "CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, comment DEFAULT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
+    qsl << "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )";
+    m_sql.createDatabaseIfNotExists(NULL, qsl);
 
-        m_sql.initSetup(NULL, qsl, QueryId::Setup);
-
-        if ( !m_persist->contains("keywordsCreated") ) {
-            m_persist->saveValueFor("keywordsCreated",true,false);
-        }
-
-        return false;
-    } else if ( !m_persist->contains("keywordsCreated") ) {
-        m_sql.executeQuery(NULL, "CREATE TABLE IF NOT EXISTS keywords ( term TEXT PRIMARY KEY, CHECK(term <> '') )", QueryId::Setup);
-        m_persist->saveValueFor("keywordsCreated",true,false);
-    }
-
-    settingChanged("mode");
-    settingChanged("keywordThreshold");
+    m_persist->registerForSetting(this, "mode");
+    m_persist->registerForSetting(this, "keywordThreshold");
 
     return true;
+}
+
+
+void QueryHelper::onDataLoaded(QVariant id, QVariant data)
+{
+    Q_UNUSED(id);
+    Q_UNUSED(data);
 }
 
 
@@ -270,13 +264,6 @@ QString QueryHelper::mode() const {
 
 int QueryHelper::threshold() const {
     return m_threshold;
-}
-
-
-bool QueryHelper::databaseReady()
-{
-    QFile dbPath(DATABASE_PATH);
-    return dbPath.exists() && dbPath.size() > 0;
 }
 
 

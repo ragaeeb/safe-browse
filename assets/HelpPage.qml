@@ -7,42 +7,18 @@ Page
     titleBar: AboutTitleBar
     {
         id: atb
-        labelColor: 'Signature' in ActionBarPlacement ? Color.Black : Color.White
+        videoTutorialUri: "http://youtu.be/Lt1SMGO2iOw"
     }
     
     actions: [
-        ActionItem
-        {
-            imageSource: "file:///usr/share/icons/bb_action_openbbmchannel.png"
-            title: atb.channelTitle
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            onTriggered: {
-                console.log("UserEvent: OpenChannelTriggered");
-                persist.openChannel();
-            }
-        },
-        
-        ActionItem
-        {
-            imageSource: "images/menu/ic_video_tutorial.png"
-            title: qsTr("Video Tutorial") + Retranslate.onLanguageChanged
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            onTriggered: {
-                console.log("UserEvent: VideoTutorialTriggered");
-                persist.tutorialVideo("http://youtu.be/Lt1SMGO2iOw", false);
-            }
-        },
-        
         ActionItem {
             title: qsTr("Parental Control") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_parents.png"
-            ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
+            ActionBar.placement: ActionBarPlacement.OnBar
 
             onTriggered: {
-                console.log("UserEvent: ParentalControlsTriggered");
-                app.invokeSettingsApp();
+                console.log("UserEvent: ParentalControls");
+                persist.invokeSettingsApp();
             }
         }
     ]

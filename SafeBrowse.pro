@@ -4,7 +4,7 @@ INCLUDEPATH += ../src ../../canadainc/src/
 INCLUDEPATH += ../../quazip/src/
 CONFIG += qt warn_on cascades10
 LIBS += -lz
-LIBS += -lbbsystem -lbbdata -lbbutilityi18n -lbbplatform -lbb -lbbdevice
+LIBS += -lbbsystem -lbbdata -lbbutilityi18n -lbbplatform -lbb -lbbdevice -lslog2
 QT += network
 
 CONFIG(release, debug|release) {

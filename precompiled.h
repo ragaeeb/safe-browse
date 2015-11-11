@@ -9,3 +9,5 @@
 #include <bb/platform/HomeScreen>
 
 #include <bb/PpsObject>
+
+#include <bb/utility/i18n/Formatting>
