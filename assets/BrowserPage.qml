@@ -10,6 +10,7 @@ Page
     property alias totalProgress: progressIndicator.toValue
     property alias browseField: browseAction
     property alias showPlaceHolder: placeHolder.delegateActive
+    property alias webContainer: mainContainer.controls
     
     function setProgress(current, total)
     {
@@ -138,7 +139,14 @@ Page
                     verticalAlignment: VerticalAlignment.Fill
                     
                     onUrlChanged: {
-                        browseAction.text = url.toString();
+                        var uri = url.toString();
+                        
+                        if ( uri.indexOf("local://") >= 0 ) {
+                            browseAction.text = "";
+                            browseAction.requestFocus();
+                        } else {
+                            browseAction.text = uri;
+                        }
                     }
                     
                     onLoadProgressChanged: {

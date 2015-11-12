@@ -50,6 +50,37 @@ NavigationPane
     BrowserPage
     {
         id: browsePage
+        webContainer: PermissionToast
+        {
+            horizontalAlignment: HorizontalAlignment.Right
+            verticalAlignment: VerticalAlignment.Center
+            labelColor: Color.Black
+            leftSpacing: 30
+            rightSpacing: 30
+            bottomSpacing: 50
+            
+            function process()
+            {
+                var allMessages = [];
+                var allIcons = [];
+                
+                if ( !persist.hasSharedFolderAccess() ) {
+                    allMessages.push("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select the icon to launch the Application Permissions screen where you can turn these settings on.");
+                    allIcons.push("images/toast/no_shared_folder.png");
+                }
+                
+                if (allMessages.length > 0)
+                {
+                    messages = allMessages;
+                    icons = allIcons;
+                    delegateActive = true;
+                }
+            }
+            
+            onCreationCompleted: {
+                process();
+            }
+        }
         
         webView.onLoadProgressChanged: {
             navigationPane.parent.unreadContentCount = 100-loadProgress;
