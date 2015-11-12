@@ -10,10 +10,10 @@ TabbedPane
     {
         id: menuDef
         bbWorldID: "31243891"
-        help.imageSource: "images/menu/ic_help.png"
+        help.imageSource: "images/common/ic_help.png"
         help.title: qsTr("Help") + Retranslate.onLanguageChanged
         projectName: "safe-browse"
-        settings.imageSource: "images/menu/ic_settings.png"
+        settings.imageSource: "images/common/ic_settings.png"
         settings.title: qsTr("Settings") + Retranslate.onLanguageChanged
         
         function onClosed() {
@@ -52,6 +52,7 @@ TabbedPane
         
         onTriggered: {
             console.log("UserEvent: NewTabTriggered");
+            reporter.record("NewTabTriggered");
             
             var newDoc = newDefinition.createObject();
             root.add(newDoc);
@@ -108,6 +109,7 @@ TabbedPane
         
         onTriggered: {
             console.log("UserEvent: BrowseTab");
+            reporter.record("BrowseTab");
         }
         
         delegate: Delegate {

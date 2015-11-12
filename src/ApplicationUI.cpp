@@ -274,7 +274,7 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
         if (added) {
             m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "images/icon_shortcut.png" );
         } else {
-            m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/error.png" );
+            m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/toast/error.png" );
 #if defined(QT_NO_DEBUG)
         Report r(ReportType::BugReportAuto);
         r.params.insert(KEY_REPORT_NOTES, QString("[FailedAddHomeScreen1]: label,url=%1;%2").arg(label).arg( url.toString() ) );
@@ -282,7 +282,7 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
 #endif
         }
     } else {
-        m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/error.png" );
+        m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/toast/error.png" );
 #if defined(QT_NO_DEBUG)
         Report r(ReportType::BugReportAuto);
         r.params.insert(KEY_REPORT_NOTES, QString("[FailedAddHomeScreen2]: label,url=%1;%2").arg(label).arg( url.toString() ) );
@@ -291,29 +291,6 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
     }
 }
 
-/*
-bool Persistance::clearCache()
-{
-    //bool clear = showBlockingDialog( tr("Confirmation"), tr("Are you sure you want to clear the cache?") );
-
-    if (clear) {
-        QFutureWatcher<void>* qfw = new QFutureWatcher<void>(this);
-        connect( qfw, SIGNAL( finished() ), this, SLOT( cacheCleared() ) );
-
-        QFuture<void> future = QtConcurrent::run(&IOUtils::clearAllCache);
-        qfw->setFuture(future);
-    }
-
-    return clear;
-    return true;
-}
-
-
-void Persistance::cacheCleared() {
-    //showToast( tr("Cache was successfully cleared!"), "file:///usr/share/icons/bb_action_delete.png" );
-}
-
- */
 
 QString ApplicationUI::renderStandardTime(QDateTime const& theTime)
 {

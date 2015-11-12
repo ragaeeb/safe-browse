@@ -18,6 +18,7 @@ Page
 
             onTriggered: {
                 console.log("UserEvent: ParentalControls");
+                reporter.record("ParentalControls");
                 persist.invokeSettingsApp();
             }
         }
