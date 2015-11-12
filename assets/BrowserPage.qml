@@ -140,33 +140,34 @@ Page
                         if (loadRequest.status == WebLoadStatus.Started) {
                             progressIndicator.visible = true;
                             progressIndicator.state = ProgressIndicatorState.Progress;
-                            busy.running = true;
+                            busy.delegateActive = true;
                         } else if (loadRequest.status == WebLoadStatus.Succeeded) {
                             progressIndicator.visible = false;
                             progressIndicator.state = ProgressIndicatorState.Complete;
-                            busy.running = false;
+                            busy.delegateActive = false;
                         } else if (loadRequest.status == WebLoadStatus.Failed) {
                             html = "<html><head><title>Load Fail</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Loading failed! Please check your internet connection.</body></html>"
                             progressIndicator.visible = false;
                             progressIndicator.state = ProgressIndicatorState.Error;
-                            busy.running = false;
+                            busy.delegateActive = false;
                         }
                     }
                 }
             }
         }
         
-        ActivityIndicator
+        ProgressControl
         {
             id: busy
-            running: false
-            preferredHeight: 50
-            preferredWidth: 50
+            asset: "images/spinners/loading_site.png"
             verticalAlignment: VerticalAlignment.Bottom
             horizontalAlignment: HorizontalAlignment.Right
+            maxHeight: 75
+            maxWidth: 75
         }
         
-        ProgressIndicator {
+        ProgressIndicator
+        {
             id: progressIndicator
             horizontalAlignment: HorizontalAlignment.Center
             verticalAlignment: VerticalAlignment.Top
