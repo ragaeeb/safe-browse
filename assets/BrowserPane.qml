@@ -15,7 +15,7 @@ NavigationPane
     }
     
     function promptForAddress() {
-        browsePage.targetPrompt.show();
+        browsePage.browseField.requestFocus();
     }
     
     onShowCloseChanged: {

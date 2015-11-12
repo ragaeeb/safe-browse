@@ -1,4 +1,4 @@
-import bb.cascades 1.0
+import bb.cascades 1.3
 import bb.system 1.2
 
 Page
@@ -8,7 +8,7 @@ Page
     property alias webView: detailsView
     property alias currentProgress: progressIndicator.value
     property alias totalProgress: progressIndicator.toValue
-    property alias targetPrompt: prompt
+    property alias browseField: browseAction
     
     function setProgress(current, total)
     {
@@ -17,6 +17,27 @@ Page
     }
     
     actions: [
+        TextInputActionItem
+        {
+            id: browseAction
+            hintText: qsTr("Enter URL...") + Retranslate.onLanguageChanged
+            input.submitKey: SubmitKey.Submit
+            input.keyLayout: KeyLayout.Url
+            content.flags: TextContentFlag.ActiveTextOff | TextContentFlag.EmoticonsOff
+            input.submitKeyFocusBehavior: SubmitKeyFocusBehavior.Lose
+            input.onSubmitted: {
+                var request = text.trim();
+                if (request.length > 0)
+                {
+                    if (request.indexOf("http://") != 0) {
+                        request = "http://" + request;
+                    }
+                    
+                    detailsView.url = request;
+                }
+            }
+        },
+        
         ActionItem {
             title: qsTr("Back") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_back.png"
@@ -33,45 +54,6 @@ Page
                 console.log("UserEvent: GoBack");
                 detailsView.goBack();
             }
-        },
-        
-        ActionItem {
-            title: qsTr("Browse") + Retranslate.onLanguageChanged
-            imageSource: "images/ic_globe.png"
-            ActionBar.placement: 'Signature' in ActionBarPlacement ? ActionBarPlacement["Signature"] : ActionBarPlacement.OnBar
-            
-            onTriggered: {
-                console.log("UserEvent: BrowseTriggered");
-                prompt.show();
-            }
-            
-            attachedObjects: [
-                SystemPrompt {
-                    id: prompt
-                    title: qsTr("Enter URL") + Retranslate.onLanguageChanged
-                    body: qsTr("Enter the URL you want to browse.") + Retranslate.onLanguageChanged
-                    confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
-                    cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
-                    inputField.defaultText: "http://www."
-                    inputOptions: SystemUiInputOption.None
-                    inputField.emptyText: qsTr("URL cannot be empty...") + Retranslate.onLanguageChanged
-                    
-                    onFinished: {
-                        console.log( "UserEvent: UrlEnteredPrompt", value, prompt.inputFieldTextEntry() );
-                        
-                        if (value == SystemUiResult.ConfirmButtonSelection)
-                        {
-                            var request = prompt.inputFieldTextEntry().trim();
-                            
-                            if (request.indexOf("http://") != 0) {
-                                request = "http://" + request;
-                            }
-                            
-                            detailsView.url = request;
-                        }
-                    }
-                }
-            ]
         },
         
         ActionItem {
@@ -141,11 +123,14 @@ Page
                 WebView
                 {
                     id: detailsView
-                    property variant requested
                     settings.zoomToFitEnabled: true
                     settings.activeTextEnabled: true
                     horizontalAlignment: HorizontalAlignment.Fill
                     verticalAlignment: VerticalAlignment.Fill
+                    
+                    onUrlChanged: {
+                        browseAction.text = url.toString();
+                    }
                     
                     onLoadProgressChanged: {
                         progressIndicator.value = loadProgress / 100.0
@@ -155,17 +140,30 @@ Page
                         if (loadRequest.status == WebLoadStatus.Started) {
                             progressIndicator.visible = true;
                             progressIndicator.state = ProgressIndicatorState.Progress;
+                            busy.running = true;
                         } else if (loadRequest.status == WebLoadStatus.Succeeded) {
                             progressIndicator.visible = false;
                             progressIndicator.state = ProgressIndicatorState.Complete;
+                            busy.running = false;
                         } else if (loadRequest.status == WebLoadStatus.Failed) {
                             html = "<html><head><title>Load Fail</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style> </head> <body>Loading failed! Please check your internet connection.</body></html>"
                             progressIndicator.visible = false;
                             progressIndicator.state = ProgressIndicatorState.Error;
+                            busy.running = false;
                         }
                     }
                 }
             }
+        }
+        
+        ActivityIndicator
+        {
+            id: busy
+            running: false
+            preferredHeight: 50
+            preferredWidth: 50
+            verticalAlignment: VerticalAlignment.Bottom
+            horizontalAlignment: HorizontalAlignment.Right
         }
         
         ProgressIndicator {

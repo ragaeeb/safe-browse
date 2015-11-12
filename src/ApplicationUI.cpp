@@ -38,7 +38,6 @@ using namespace canadainc;
 
 ApplicationUI::ApplicationUI(bb::system::InvokeManager* im) :
         m_persistance(im), m_account(&m_persistance),
-        m_sceneCover( im->startupMode() != ApplicationStartupMode::InvokeCard, this ),
         m_helper(&m_persistance), m_root(NULL)
 {
     switch ( im->startupMode() )
@@ -51,6 +50,7 @@ ApplicationUI::ApplicationUI(bb::system::InvokeManager* im) :
             connect( im, SIGNAL( cardPooled(bb::system::CardDoneMessage const&) ), QCoreApplication::instance(), SLOT( quit() ) );
             connect( im, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
+
         case ApplicationStartupMode::InvokeApplication:
             connect( im, SIGNAL( invoked(bb::system::InvokeRequest const&) ), this, SLOT( invoked(bb::system::InvokeRequest const&) ) );
             break;
