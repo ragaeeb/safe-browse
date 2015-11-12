@@ -9,6 +9,7 @@ Page
     property alias currentProgress: progressIndicator.value
     property alias totalProgress: progressIndicator.toValue
     property alias browseField: browseAction
+    property alias showPlaceHolder: placeHolder.delegateActive
     
     function setProgress(current, total)
     {
@@ -153,6 +154,17 @@ Page
                         }
                     }
                 }
+            }
+        }
+        
+        EmptyDelegate
+        {
+            id: placeHolder
+            labelText: qsTr("Please enter a URL on the address bar below...") + Retranslate.onLanguageChanged
+            graphic: "images/ic_browse.png"
+            
+            onImageTapped: {
+                browseAction.requestFocus();
             }
         }
         
