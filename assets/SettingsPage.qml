@@ -31,7 +31,8 @@ Page
             ]
             
             onTriggered: {
-                console.log("UserEvent: AddSiteTriggered");
+                console.log("UserEvent: AddSite");
+                reporter.record("AddSite");
                 addPrompt.show();
             }
             
@@ -51,6 +52,8 @@ Page
 
                         if (value == SystemUiResult.ConfirmButtonSelection)
                         {
+                            reporter.record("BlockedHostEntered");
+                            
                             var request = inputFieldTextEntry().trim();
                             helper.blockSite(listView, modeDropDown.selectedValue, request);
                         }
@@ -66,7 +69,8 @@ Page
             ActionBar.placement: ActionBarPlacement.OnBar
             
             onTriggered: {
-                console.log("UserEvent: SetHomeTriggered");
+                console.log("UserEvent: SetHome");
+                reporter.record("SetHome");
                 homePrompt.showPrompt();
             }
             
@@ -75,13 +79,14 @@ Page
                 {
                     id: homePrompt
                     title: qsTr("Enter URL") + Retranslate.onLanguageChanged
-                    body: qsTr("Enter the homepage address (ie: http://learnaboutislam.co.uk)") + Retranslate.onLanguageChanged
+                    body: qsTr("Enter the homepage address (ie: http://dar-as-sahaba.com)") + Retranslate.onLanguageChanged
                     confirmButton.label: qsTr("OK") + Retranslate.onLanguageChanged
                     cancelButton.label: qsTr("Cancel") + Retranslate.onLanguageChanged
                     inputField.emptyText: "http://canadainc.org"
                     inputOptions: SystemUiInputOption.None
                     
-                    function showPrompt() {
+                    function showPrompt()
+                    {
                         inputField.defaultText = persist.getValueFor("home");
                         show();
                     }
@@ -89,9 +94,10 @@ Page
                     onFinished: {
                         console.log( "UserEvent: HomepageAddressEntered", value, inputFieldTextEntry() );
                         
-                        if (result == SystemUiResult.ConfirmButtonSelection)
+                        if (value == SystemUiResult.ConfirmButtonSelection)
                         {
                             var request = inputFieldTextEntry().trim();
+                            reporter.record("HomepageAddressEntered", request);
 
                             persist.saveValueFor("home", request, false);
                             persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "images/ic_home.png" );
@@ -105,6 +111,7 @@ Page
         
         ActionItem
         {
+            id: safeRun
             imageSource: "images/menu/ic_safe_run.png"
             title: qsTr("Safe Run") + Retranslate.onLanguageChanged
             ActionBar.placement: ActionBarPlacement.OnBar
@@ -116,8 +123,22 @@ Page
                 }
             }
             
+            function onFinished(ok)
+            {
+                if (ok)
+                {
+                    definition.source = "SafeRunPage.qml";
+                    var safeRun = definition.createObject();
+                    dashPage.parent.push(safeRun);
+                    
+                    safeRun.targetPrompt.show();
+                    dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
+                }
+            }
+            
             onTriggered: {
-                console.log("UserEvent: SafeRunTriggered");
+                console.log("UserEvent: SafeRun");
+                reporter.record("SafeRun");
                 var message;
                 
                 if (helper.mode == "passive") {
@@ -126,14 +147,7 @@ Page
                     message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
                 }
                 
-                persist.showBlockingToast( message, qsTr("OK"), "asset:///images/menu/ic_safe_run.png" );
-                
-                definition.source = "SafeRunPage.qml";
-                var safeRun = definition.createObject();
-                dashPage.parent.push(safeRun);
-                
-                safeRun.targetPrompt.show();
-                dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
+                persist.showDialog( safeRun, title, message, qsTr("OK"), "" );
             }
         },
         
@@ -143,7 +157,8 @@ Page
             title: qsTr("Change Password") + Retranslate.onLanguageChanged
             
             onTriggered: {
-                console.log("UserEvent: ChangePasswordTriggered");
+                console.log("UserEvent: ChangePassword");
+                reporter.record("ChangePassword");
                 definition.source = "SignupSheet.qml";
                 var sheet = definition.createObject();
                 sheet.open();
@@ -156,7 +171,8 @@ Page
             title: qsTr("Blocked Keywords") + Retranslate.onLanguageChanged
             
             onTriggered: {
-                console.log("UserEvent: BlockedKeywordsTriggered");
+                console.log("UserEvent: BlockedKeywords");
+                reporter.record("BlockedKeywords");
                 definition.source = "BlockedKeywordPage.qml";
                 var keywords = definition.createObject();
                 dashPage.parent.push(keywords);
@@ -171,28 +187,26 @@ Page
             shortcuts: [
                 Shortcut {
                     key: qsTr("V") + Retranslate.onLanguageChanged
+                    
+                    onTriggered: {
+                        reporter.record("ViewLogsShortcut");
+                    }
                 }
             ]
             
             onTriggered: {
-                console.log("UserEvent: ViewLogsTriggered");
+                console.log("UserEvent: ViewLogs");
+                reporter.record("ViewLogs");
                 definition.source = "ViewLogsPage.qml";
                 var page = definition.createObject();
                 dashPage.parent.push(page);
             }
-        },
-        
-        DeleteActionItem
-        {
-            imageSource: "images/menu/ic_clear_cache.png"
-            title: qsTr("Clear Cache") + Retranslate.onLanguageChanged
-            
-            onTriggered: {
-                console.log("UserEvent: ClearCacheTriggered");
-                persist.clearCache();
-            }
         }
     ]
+    
+    function cleanUp() {
+        dashPage.parent.popTransitionEnded.disconnect(safeRun.onPopTransitionEnded);
+    }
     
     Container
     {
@@ -229,13 +243,25 @@ Page
         horizontalAlignment: HorizontalAlignment.Fill
         leftPadding: 10; rightPadding: 10;
         
-        PersistDropDown
+        SegmentedControl
         {
             id: modeDropDown
-            key: "mode"
-            title: qsTr("Browsing Mode") + Retranslate.onLanguageChanged
+            
+            onCreationCompleted: {
+                var primary = persist.getValueFor("mode");
+                
+                for (var i = count()-1; i >= 0; i--)
+                {
+                    if ( at(i).value == primary )
+                    {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+            }
             
             Option {
+                id: passive
                 text: qsTr("Passive") + Retranslate.onLanguageChanged
                 description: qsTr("Allow all sites except certain ones") + Retranslate.onLanguageChanged
                 value: "passive"
@@ -243,13 +269,16 @@ Page
             }
             
             Option {
+                id: controlled
                 text: qsTr("Controlled") + Retranslate.onLanguageChanged
                 description: qsTr("Block all sites except certain ones") + Retranslate.onLanguageChanged
                 value: "controlled"
                 imageSource: "images/dropdown/ic_controlled.png"
             }
             
-            onValueChanged: {
+            onSelectedValueChanged: {
+                var diff = persist.saveValueFor("mode", selectedValue);
+                
                 if (diff)
                 {
                     if (selectedValue == "passive") {
@@ -258,6 +287,8 @@ Page
                         if ( persist.tutorial( "tutorialSafeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "asset:///images/menu/ic_safe_run.png" ) ) {}
                         persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "images/dropdown/ic_controlled.png" );
                     }
+                    
+                    reporter.record("BrowsingMode", selectedValue);
                 }
                 
                 helper.fetchAllBlocked(listView, selectedValue);
@@ -272,9 +303,11 @@ Page
         {
             id: noElements
             graphic: "images/placeholder/blocked_empty.png"
-            labelText: qsTr("There are no websites currently blocked. Tap here to add one.") + Retranslate.onLanguageChanged
+            labelText: modeDropDown.selectedOption == passive ? qsTr("There are no websites currently blocked. Tap here to add one.") + Retranslate.onLanguageChanged : qsTr("There are no websites currently allowed. Tap here to add one.") + Retranslate.onLanguageChanged
             
             onImageTapped: {
+                console.log("UserEvent: AddExceptionUrlTapped")
+                reporter.record("AddExceptionUrlTapped");
                 addAction.triggered();
             }
         }
@@ -290,6 +323,7 @@ Page
             
             onTriggered: {
                 console.log("UserEvent: BlockedListItem Tapped", indexPath);
+                reporter.record("ExceptionUrlTriggered");
                 multiSelectHandler.active = true;
                 toggleSelection(indexPath);
             }
@@ -305,7 +339,8 @@ Page
                         enabled: false
                         
                         onTriggered: {
-                            console.log("UserEvent: UnblockMultiSenders");
+                            console.log("UserEvent: UnblockMultiExceptions");
+                            reporter.record("UnblockMultiExceptions");
                             var selected = listView.selectionList();
                             var blocked = [];
                             
@@ -411,12 +446,16 @@ Page
                     if (!loggedIn)
                     {
                         helper.logFailedLogin(listView, password);
+                        reporter.record("FailedAuthentication");
                         persist.showToast( qsTr("Wrong password entered. Please try again."), "images/dropdown/set_password.png" );
                         dashPage.parent.pop();
                     } else {
                         guardianContainer.opacity = 1;
+                        reporter.record("AuthenticationSuccess");
                     }
                 } else {
+                    reporter.record("CanceledAuthentication");
+                    
                     dashPage.removeAllActions();
                     dashPage.parent.pop();
                 }

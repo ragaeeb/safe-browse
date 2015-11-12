@@ -52,7 +52,8 @@ Page
                     verticalAlignment: VerticalAlignment.Fill
                     leftPadding: 10; rightPadding: 10; topPadding: 5; bottomPadding: 10
                     
-                    Slider {
+                    Slider
+                    {
                         value: persist.getValueFor("keywordThreshold")
                         horizontalAlignment: HorizontalAlignment.Fill
                         fromValue: 1
@@ -62,6 +63,10 @@ Page
                             var actualValue = Math.floor(value);
                             var changed = persist.saveValueFor("keywordThreshold", actualValue);
                             thresholdLabel.text = qsTr("Threshold: %1").arg(actualValue);
+                            
+                            if (changed) {
+                                reporter.record("KeywordThreshold", actualValue);
+                            }
                         }
                     }
                 }
@@ -70,7 +75,8 @@ Page
     }
     
     actions: [
-        ActionItem {
+        ActionItem
+        {
             id: addAction
             title: qsTr("Add") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_add.png"
@@ -84,11 +90,13 @@ Page
             
             onTriggered: {
                 console.log("UserEvent: AddBlockedKeyword");
+                reporter.record("AddBlockedKeyword");
                 addPrompt.show();
             }
             
             attachedObjects: [
-                SystemPrompt {
+                SystemPrompt
+                {
                     id: addPrompt
                     title: qsTr("Add Keyword") + Retranslate.onLanguageChanged
                     body: qsTr("Enter the keyword you wish to add (no spaces):") + Retranslate.onLanguageChanged
@@ -105,8 +113,10 @@ Page
                             
                             if ( value.indexOf(" ") >= 0 ) {
                                 persist.showToast( qsTr("The keyword cannot contain any spaces!"), "images/ic_block.png" );
+                                reporter.record("SpacedKeywordError");
                                 return;
                             } else if (value.length < 3 || value.length > 20) {
+                                reporter.record("OutOfBoundsKeywordError");
                                 persist.showToast( qsTr("The keyword must be between 3 to 20 characters in length (inclusive)!"), "images/ic_block.png" );
                                 return;
                             }
@@ -114,8 +124,10 @@ Page
                             var keywordsList = helper.blockKeywords(root, [value]);
                             
                             if (keywordsList.length > 0) {
+                                reporter.record("KeywordAdded");
                                 persist.showToast( qsTr("The following keywords were added: %1").arg( keywordsList.join(", ") ), "images/menu/ic_keywords.png" );
                             } else {
+                                reporter.record("KeywordAddFailed", value);
                                 persist.showToast( qsTr("The keyword could not be blocked: %1").arg(value), "images/ic_block.png" );
                             }
                         }
@@ -127,19 +139,25 @@ Page
         DeleteActionItem
         {
             id: unblockAllAction
+            enabled: listView.visible
             title: qsTr("Clear All") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_unblock.png"
             
-            onTriggered: {
-                console.log("UserEvent: ClearAllBlockedKeywords");
-                var result = persist.showBlockingDialog( qsTr("Confirmation"), qsTr("Are you sure you want to clear all keywords?") );
-                
-                if (result)
+            function onFinished(ok)
+            {
+                if (ok)
                 {
+                    reporter.record("ClearAllKeywordsAccept");
                     helper.clearBlockedKeywords(root);
                     adm.clear();
                     emptyDelegate.delegateActive = true;
                 }
+            }
+            
+            onTriggered: {
+                console.log("UserEvent: ClearAllBlockedKeywords");
+                reporter.record("ClearAllBlockedKeywords");
+                persist.showDialog( unblockAllAction, qsTr("Confirmation"), qsTr("Are you sure you want to clear all the keywords?") );
             }
         }
     ]
@@ -165,6 +183,7 @@ Page
             
             onImageTapped: {
                 console.log("UserEvent: BlockedKeywordEmptyTapped");
+                reporter.record("BlockedKeywordEmptyTapped");
                 addPrompt.show();
             }
         }
@@ -247,6 +266,7 @@ Page
                                     
                                     onTriggered: {
                                         console.log("UserEvent: UnblockKeyword");
+                                        reporter.record("UnblockKeyword");
                                         sli.ListItem.view.unblock([ListItemData]);
                                     }
                                 }
@@ -268,6 +288,7 @@ Page
                         
                         onTriggered: {
                             console.log("UserEvent: MultiUnblock");
+                            reporter.record("MultiUnblock");
                             var selected = listView.selectionList();
                             var blocked = [];
                             

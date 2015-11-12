@@ -49,6 +49,8 @@ Page
         ]
         
         onSelectedValueChanged: {
+            console.log("UserEvent: ViewLogMode", selectedValue);
+            reporter.record("ViewLogMode", selectedValue);
             helper.fetchAllLogs(listView, selectedValue);
         }
     }
@@ -56,19 +58,26 @@ Page
     actions: [
         DeleteActionItem
         {
+            id: clearLogsAction
             imageSource: "images/menu/ic_clear_logs.png"
             title: qsTr("Clear Logs") + Retranslate.onLanguageChanged
+            enabled: listView.visible
             
-            onTriggered: {
-                console.log("UserEvent: ClearLogs");
-                
-                var result = persist.showBlockingDialog( qsTr("Confirmation"), qsTr("Are you sure you want to clear all logs?") );
-                
-                if (result) {
+            function onFinished(ok)
+            {
+                if (ok)
+                {
+                    reporter.record("ClearLogsConfirmed");
                     helper.clearAllLogs(viewLogPage);
                     adm.clear();
                     noElements.delegateActive = true;
                 }
+            }
+            
+            onTriggered: {
+                console.log("UserEvent: ClearLogs");
+                reporter.record("ClearLogs");
+                persist.showDialog( clearLogsAction, qsTr("Confirmation"), qsTr("Are you sure you want to clear all logs?") );
             }
         }
     ]

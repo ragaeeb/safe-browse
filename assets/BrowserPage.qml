@@ -28,6 +28,8 @@ Page
             content.flags: TextContentFlag.ActiveTextOff | TextContentFlag.EmoticonsOff
             input.submitKeyFocusBehavior: SubmitKeyFocusBehavior.Lose
             input.onSubmitted: {
+                reporter.record("UrlSubmitted");
+                
                 var request = text.trim();
                 if (request.length > 0)
                 {
@@ -49,11 +51,16 @@ Page
             shortcuts: [
                 SystemShortcut {
                     type: SystemShortcuts.PreviousSection
+                    
+                    onTriggered: {
+                        reporter.record("GoBackShortcut");
+                    }
                 }
             ]
             
             onTriggered: {
                 console.log("UserEvent: GoBack");
+                reporter.record("GoBack");
                 detailsView.goBack();
             }
         },
@@ -67,11 +74,16 @@ Page
             shortcuts: [
                 SystemShortcut {
                     type: SystemShortcuts.NextSection
+                    
+                    onTriggered: {
+                        reporter.record("GoForwardShortcut");
+                    }
                 }
             ]
             
             onTriggered: {
                 console.log("UserEvent: GoForward");
+                reporter.record("GoForward");
                 detailsView.goForward();
             }
         },
@@ -83,11 +95,16 @@ Page
             shortcuts: [
                 SystemShortcut {
                     type: SystemShortcuts.Reply
+                    
+                    onTriggered: {
+                        reporter.record("RefreshShortcut");
+                    }
                 }
             ]
             
             onTriggered: {
                 console.log("UserEvent: RefreshTriggered");
+                reporter.record("RefreshTriggered");
                 
                 if ( detailsView.url.toString() != "local:///" ) {
                     detailsView.urlChanged(detailsView.url);
@@ -180,6 +197,8 @@ Page
             graphic: "images/ic_browse.png"
             
             onImageTapped: {
+                console.log("UserEvent: EnterUrlPlaceHolderTapped");
+                reporter.record("EnterUrlPlaceHolderTapped");
                 browseAction.requestFocus();
             }
         }
@@ -214,11 +233,12 @@ Page
         {
             id: jumpTop
             title: qsTr("Top") + Retranslate.onLanguageChanged
-            imageSource: "images/menu/ic_top.png"
+            imageSource: "images/common/ic_top.png"
             ActionBar.placement: ActionBarPlacement.InOverflow
             
             onTriggered: {
                 console.log("UserEvent: JumpToTopBrowser");
+                reporter.record("JumpToTopBrowser");
                 scrollView.scrollToPoint(0,0);
             }
         },
@@ -227,11 +247,12 @@ Page
         {
             id: jumpBottom
             title: qsTr("Bottom") + Retranslate.onLanguageChanged
-            imageSource: "images/menu/ic_bottom.png"
+            imageSource: "images/common/ic_bottom.png"
             ActionBar.placement: ActionBarPlacement.InOverflow
             
             onTriggered: {
                 console.log("UserEvent: JumpToBottomBrowser");
+                reporter.record("JumpToBottomBrowser");
                 scrollView.scrollToPoint(0, Infinity);
             }
         }

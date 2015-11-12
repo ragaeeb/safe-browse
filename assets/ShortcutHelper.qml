@@ -31,12 +31,15 @@ QtObject
                 var result = inputFieldTextEntry().trim();
                 
                 if (result.length > 0) {
+                    console.log("UserEvent: HomePromptConfirm");
                     app.addToHomeScreen(result, urlToPin, "images/icon_shortcut.png");
                 } else {
-                    persist.showToast( qsTr("Invalid shortcut name entered"), "images/error.png" );
+                    persist.showToast( qsTr("Invalid shortcut name entered"), "images/toast/error.png" );
+                    reporter.record("InvalidShortcut");
                 }
             } else {
                 console.log("UserEvent: HomePromptCancel");
+                reporter.record("HomePromptCancel");
             }
         }
     }
