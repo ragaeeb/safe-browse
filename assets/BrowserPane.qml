@@ -16,6 +16,7 @@ NavigationPane
     
     function promptForAddress() {
         browsePage.browseField.requestFocus();
+        browsePage.showPlaceHolder = true;
     }
     
     onShowCloseChanged: {
