@@ -95,8 +95,16 @@ Page
         }
     ]
     
+    onCreationCompleted: {
+        if (!deviceUtils.isPhysicalKeyboardDevice) {
+            addAction(jumpTop);
+            addAction(jumpBottom);
+        }
+    }
+    
     Container
     {
+        id: mainContainer
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
         background: Color.White
@@ -192,4 +200,32 @@ Page
             topMargin: 0; bottomMargin: 0; leftMargin: 0; rightMargin: 0;
         }
     }
+    
+    attachedObjects: [
+        ActionItem
+        {
+            id: jumpTop
+            title: qsTr("Top") + Retranslate.onLanguageChanged
+            imageSource: "images/menu/ic_top.png"
+            ActionBar.placement: ActionBarPlacement.InOverflow
+            
+            onTriggered: {
+                console.log("UserEvent: JumpToTopBrowser");
+                scrollView.scrollToPoint(0,0);
+            }
+        },
+        
+        ActionItem
+        {
+            id: jumpBottom
+            title: qsTr("Bottom") + Retranslate.onLanguageChanged
+            imageSource: "images/menu/ic_bottom.png"
+            ActionBar.placement: ActionBarPlacement.InOverflow
+            
+            onTriggered: {
+                console.log("UserEvent: JumpToBottomBrowser");
+                scrollView.scrollToPoint(0, Infinity);
+            }
+        }
+    ]
 }

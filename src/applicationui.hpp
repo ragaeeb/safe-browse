@@ -2,6 +2,7 @@
 #define ApplicationUI_HPP_
 
 #include "AccountManager.h"
+#include "DeviceUtils.h"
 #include "NetworkProcessor.h"
 #include "Persistance.h"
 #include "QueryHelper.h"
@@ -26,8 +27,10 @@ class ApplicationUI : public QObject
 	bb::system::InvokeRequest m_request;
 	QObject* m_root;
 	bb::system::LocaleHandler m_timeRender;
+	DeviceUtils m_device;
 
     void init(QString const& qml);
+    void processInvoke();
 
 private slots:
     void childCardDone(bb::system::CardDoneMessage const& message=bb::system::CardDoneMessage());

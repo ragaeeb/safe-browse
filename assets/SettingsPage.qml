@@ -94,7 +94,7 @@ Page
                             var request = inputFieldTextEntry().trim();
 
                             persist.saveValueFor("home", request, false);
-                            persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "", "asset:///images/ic_home.png" );
+                            persist.showToast( qsTr("Successfully set homepage to %1").arg(request), "images/ic_home.png" );
                             
                             helper.blockSite(listView, "controlled", request);
                         }
@@ -219,6 +219,8 @@ Page
                 else if ( persist.tutorial( "tutorialViewLogs", qsTr("You can use the 'View Logs' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred."), "asset:///images/menu/ic_logs.png" ) ) {}
                 else if ( persist.tutorial( "tutorialChangePassword", qsTr("If you want to change your password, you can choose the 'Change Password' item from the menu."), "asset:///images/ic_password.png" ) ) {}
                 else if ( persist.tutorial( "tutorialClearCache", qsTr("If you notice the app taking up a lot of space, you should choose 'Clear Cache' from the menu."), "asset:///images/menu/ic_clear_cache.png" ) ) {}
+                
+                deviceUtils.attachTopBottomKeys(dashPage, listView);
             }
         }
         
@@ -251,10 +253,10 @@ Page
                 if (diff)
                 {
                     if (selectedValue == "passive") {
-                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "", "asset:///images/dropdown/ic_passive.png" );
+                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "images/dropdown/ic_passive.png" );
                     } else if (selectedValue == "controlled") {
                         if ( persist.tutorial( "tutorialSafeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "asset:///images/menu/ic_safe_run.png" ) ) {}
-                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "", "asset:///images/dropdown/ic_controlled.png" );
+                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "images/dropdown/ic_controlled.png" );
                     }
                 }
                 
@@ -409,7 +411,7 @@ Page
                     if (!loggedIn)
                     {
                         helper.logFailedLogin(listView, password);
-                        persist.showToast( qsTr("Wrong password entered. Please try again."), "", "asset:///images/dropdown/set_password.png" );
+                        persist.showToast( qsTr("Wrong password entered. Please try again."), "images/dropdown/set_password.png" );
                         dashPage.parent.pop();
                     } else {
                         guardianContainer.opacity = 1;

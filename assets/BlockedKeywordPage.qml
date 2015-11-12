@@ -104,19 +104,19 @@ Page
                             var value = addPrompt.inputFieldTextEntry().trim().toLowerCase();
                             
                             if ( value.indexOf(" ") >= 0 ) {
-                                persist.showToast( qsTr("The keyword cannot contain any spaces!"), "", "asset:///images/ic_block.png" );
+                                persist.showToast( qsTr("The keyword cannot contain any spaces!"), "images/ic_block.png" );
                                 return;
                             } else if (value.length < 3 || value.length > 20) {
-                                persist.showToast( qsTr("The keyword must be between 3 to 20 characters in length (inclusive)!"), "", "asset:///images/ic_block.png" );
+                                persist.showToast( qsTr("The keyword must be between 3 to 20 characters in length (inclusive)!"), "images/ic_block.png" );
                                 return;
                             }
                             
                             var keywordsList = helper.blockKeywords(root, [value]);
                             
                             if (keywordsList.length > 0) {
-                                persist.showToast( qsTr("The following keywords were added: %1").arg( keywordsList.join(", ") ), "", "asset:///images/menu/ic_keywords.png" );
+                                persist.showToast( qsTr("The following keywords were added: %1").arg( keywordsList.join(", ") ), "images/menu/ic_keywords.png" );
                             } else {
-                                persist.showToast( qsTr("The keyword could not be blocked: %1").arg(value), "", "asset:///images/ic_block.png" );
+                                persist.showToast( qsTr("The keyword could not be blocked: %1").arg(value), "images/ic_block.png" );
                             }
                         }
                     }
@@ -146,6 +146,7 @@ Page
     
     onCreationCompleted: {
         helper.fetchAllBlockedKeywords(root);
+        deviceUtils.attachTopBottomKeys(root, listView);
     }
     
     Container
@@ -185,9 +186,9 @@ Page
                 var keywordsList = helper.unblockKeywords(root, blocked);
                 
                 if (keywordsList.length > 0) {
-                    persist.showToast( qsTr("The following keywords were unblocked: %1").arg( keywordsList.join(", ") ), "", "asset:///images/menu/ic_unblock.png" );
+                    persist.showToast( qsTr("The following keywords were unblocked: %1").arg( keywordsList.join(", ") ), "images/menu/ic_unblock.png" );
                 } else {
-                    persist.showToast( qsTr("The following keywords could not be unblocked: %1").arg( blocked.join(", ") ), "", "asset:///images/tabs/ic_blocked.png" );
+                    persist.showToast( qsTr("The following keywords could not be unblocked: %1").arg( blocked.join(", ") ), "images/tabs/ic_blocked.png" );
                 }
             }
             

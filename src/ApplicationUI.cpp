@@ -88,6 +88,18 @@ void ApplicationUI::lazyInit()
 
     m_helper.initDatabase();
 
+    processInvoke();
+
+    AppLogFetcher::create( &m_persistance, &ThreadUtils::compressFiles, this );
+    DeviceUtils::registerTutorialTips(this);
+
+    emit lazyInitComplete();
+    //if ( !InvocationUtils::validateSharedFolderAccess( tr("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select OK to launch the Application Permissions screen where you can turn these settings on.") ) ) {}
+}
+
+
+void ApplicationUI::processInvoke()
+{
     QString target = m_request.target();
 
     if ( !target.isNull() )
@@ -136,12 +148,8 @@ void ApplicationUI::lazyInit()
 
         m_root->setProperty("target", home);
     }
-
-    AppLogFetcher::create( &m_persistance, &ThreadUtils::compressFiles, this );
-
-    emit lazyInitComplete();
-    //if ( !InvocationUtils::validateSharedFolderAccess( tr("Warning: It seems like the app does not have access to your Shared Folder. This permission is needed for the app to properly allow you to download files from the Internet and save them to your device. If you leave this permission off, some features may not work properly. Select OK to launch the Application Permissions screen where you can turn these settings on.") ) ) {}
 }
+
 
 
 void ApplicationUI::invoked(bb::system::InvokeRequest const& request)
@@ -265,7 +273,7 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
         bool added = bb::platform::HomeScreen().addShortcut( QUrl("asset:///images/icon_shortcut.png"), TextUtils::sanitize(label), uri);
 
         if (added) {
-            m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "asset:///images/icon_shortcut.png" );
+            m_persistance.showToast( tr("Successfully added %1 to the homescreen!").arg(label), "images/icon_shortcut.png" );
         } else {
             m_persistance.showToast( tr("Could not add %1 to the homescreen! Please file a bug report by swiping down from the top-bezel and choosing 'Bug Reports' and then clicking 'Submit Logs'. Please ensure the UI Logging is on and the problem is reproduced before you file the report."), "images/error.png" );
 #if defined(QT_NO_DEBUG)

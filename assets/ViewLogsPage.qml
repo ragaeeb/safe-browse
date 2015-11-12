@@ -6,16 +6,61 @@ Page
     id: viewLogPage
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     
-    titleBar: TitleBar {
-        title: qsTr("View Logs") + Retranslate.onLanguageChanged
+    onCreationCompleted: {
+        deviceUtils.attachTopBottomKeys(viewLogPage, listView);
+    }
+    
+    titleBar: TitleBar
+    {
+        kind: TitleBarKind.Segmented
+
+        options: [
+            Option {
+                id: allFilter
+                text: qsTr("All") + Retranslate.onLanguageChanged
+                description: qsTr("Show All Activity") + Retranslate.onLanguageChanged
+                imageSource: "images/dropdown/ic_logs_all.png"
+                value: ""
+            },
+            
+            Option {
+                id: loginFilter
+                text: qsTr("Authentication") + Retranslate.onLanguageChanged
+                description: qsTr("Show Only Login Activity") + Retranslate.onLanguageChanged
+                imageSource: "images/dropdown/ic_logs_authentication.png"
+                value: "failed_login"
+            },
+            
+            Option {
+                id: browsingFilter
+                text: qsTr("Browsing") + Retranslate.onLanguageChanged
+                description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
+                imageSource: "images/dropdown/ic_logs_browse.png"
+                value: "requested"
+            },
+            
+            Option {
+                id: blockedFilter
+                text: qsTr("Blocked") + Retranslate.onLanguageChanged
+                description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
+                imageSource: "images/dropdown/ic_logs_blocked.png"
+                value: "blocked"
+            }
+        ]
+        
+        onSelectedValueChanged: {
+            helper.fetchAllLogs(listView, selectedValue);
+        }
     }
     
     actions: [
-        DeleteActionItem {
+        DeleteActionItem
+        {
+            imageSource: "images/menu/ic_clear_logs.png"
             title: qsTr("Clear Logs") + Retranslate.onLanguageChanged
             
             onTriggered: {
-                console.log("UserEvent: ClearLogsTriggered");
+                console.log("UserEvent: ClearLogs");
                 
                 var result = persist.showBlockingDialog( qsTr("Confirmation"), qsTr("Are you sure you want to clear all logs?") );
                 
@@ -32,50 +77,6 @@ Page
     {
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
-        
-        DropDown
-        {
-            id: actionDropDown
-            horizontalAlignment: HorizontalAlignment.Fill
-            title: qsTr("Action") + Retranslate.onLanguageChanged
-            selectedOption: allFilter
-            
-            Option {
-                id: allFilter
-                text: qsTr("All") + Retranslate.onLanguageChanged
-                description: qsTr("Show All Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/dropdown/ic_logs_all.png"
-                value: ""
-            }
-            
-            Option {
-                id: loginFilter
-                text: qsTr("Authentication") + Retranslate.onLanguageChanged
-                description: qsTr("Show Only Login Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/dropdown/ic_logs_authentication.png"
-                value: "failed_login"
-            }
-            
-            Option {
-                id: browsingFilter
-                text: qsTr("Browsing") + Retranslate.onLanguageChanged
-                description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/dropdown/ic_logs_browse.png"
-                value: "requested"
-            }
-            
-            Option {
-                id: blockedFilter
-                text: qsTr("Blocked") + Retranslate.onLanguageChanged
-                description: qsTr("Show Only Browsing Activity") + Retranslate.onLanguageChanged
-                imageSource: "images/dropdown/ic_logs_blocked.png"
-                value: "blocked"
-            }
-            
-            onSelectedValueChanged: {
-                helper.fetchAllLogs(listView, selectedValue);
-            }
-        }
         
         EmptyDelegate
         {
