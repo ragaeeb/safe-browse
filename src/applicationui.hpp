@@ -2,7 +2,6 @@
 #define ApplicationUI_HPP_
 
 #include "AccountManager.h"
-#include "LazySceneCover.h"
 #include "NetworkProcessor.h"
 #include "Persistance.h"
 #include "QueryHelper.h"
@@ -20,7 +19,6 @@ class ApplicationUI : public QObject
 
     Persistance m_persistance;
 	AccountManager m_account;
-	LazySceneCover m_sceneCover;
 	QueryHelper m_helper;
 	NetworkProcessor m_network;
 	QMap<QString, bool> m_extensions;
