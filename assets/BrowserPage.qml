@@ -12,6 +12,8 @@ Page
     property alias showPlaceHolder: placeHolder.delegateActive
     property alias webContainer: mainContainer.controls
     
+    function cleanUp() {}
+    
     function setProgress(current, total)
     {
         progressIndicator.value = current;

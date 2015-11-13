@@ -23,6 +23,8 @@ Page
             }
         }
     ]
+    
+    function cleanUp() {}
 
     Container
     {
