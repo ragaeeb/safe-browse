@@ -299,6 +299,40 @@ QString ApplicationUI::renderStandardTime(QDateTime const& theTime)
 }
 
 
+void ApplicationUI::backup(QObject* caller, QString const& callback, QString const& destination, bool restore)
+{
+    LOGGER(destination);
+
+    BackupStruct bs(caller, callback, destination);
+
+    QFutureWatcher<BackupStruct>* qfw = new QFutureWatcher<BackupStruct>(this);
+    connect( qfw, SIGNAL( finished() ), this, SLOT( onSaved() ) );
+
+    if (restore)
+    {
+        QFuture<BackupStruct> future = QtConcurrent::run(&ThreadUtils::performRestore, bs);
+        qfw->setFuture(future);
+    } else {
+        QFuture<BackupStruct> future = QtConcurrent::run(&ThreadUtils::compressDatabase, bs);
+        qfw->setFuture(future);
+    }
+}
+
+
+void ApplicationUI::onSaved()
+{
+    QFutureWatcher<BackupStruct>* qfw = static_cast< QFutureWatcher<BackupStruct>* >( sender() );
+    BackupStruct result = qfw->result();
+
+    QObject* caller = result.caller;
+    QByteArray qba = result.callback.toUtf8();
+    const char* callback = qba.constData();
+
+    qfw->deleteLater();
+    QMetaObject::invokeMethod( caller, callback, Qt::QueuedConnection, Q_ARG(QVariant, result.destination) );
+}
+
+
 ApplicationUI::~ApplicationUI()
 {
 }

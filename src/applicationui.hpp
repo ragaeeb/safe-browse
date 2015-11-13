@@ -37,6 +37,7 @@ private slots:
     void invoked(bb::system::InvokeRequest const& request);
     void lazyInit();
     void onFileWritten();
+    void onSaved();
     void progress(QVariant const& cookie, qint64 bytesSent, qint64 bytesTotal);
     void requestComplete(QVariant const& cookie, QByteArray const& data, bool error);
 
@@ -52,6 +53,7 @@ public:
     Q_INVOKABLE void invokeSettingsApp();
     Q_INVOKABLE void invokeSystemApp(QUrl const& uri);
     Q_INVOKABLE QString renderStandardTime(QDateTime const& theTime);
+    Q_INVOKABLE void backup(QObject* caller, QString const& callback, QString const& destination, bool restore);
 };
 
 } // salat

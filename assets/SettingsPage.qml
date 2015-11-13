@@ -1,4 +1,5 @@
 import bb.cascades 1.0
+import bb.cascades.pickers 1.0
 import bb.system 1.2
 import com.canadainc.data 1.0
 
@@ -201,6 +202,69 @@ Page
                 var page = definition.createObject();
                 dashPage.parent.push(page);
             }
+        },
+        
+        ActionItem
+        {
+            id: backup
+            title: qsTr("Backup") + Retranslate.onLanguageChanged
+            imageSource: "images/menu/ic_backup.png"
+            
+            onTriggered: {
+                console.log("UserEvent: Backup");
+                filePicker.title = qsTr("Select Destination");
+                filePicker.mode = FilePickerMode.Saver
+                filePicker.defaultSaveFileNames = ["safe_browse_backup.sb"]
+                filePicker.allowOverwrite = true;
+                filePicker.open();
+                
+                reporter.record("Backup");
+            }
+            
+            function onSaved(result)
+            {
+                if (result.length > 0) {
+                    persist.showToast( qsTr("Successfully backed up to %1").arg(result), imageSource.toString() );
+                } else {
+                    persist.showToast( qsTr("The database could not be backed up. Please file a bug report."), "images/toast/error.png" );
+                }
+                
+                reporter.record("BackupResult", result);
+            }
+        },
+        
+        ActionItem
+        {
+            id: restore
+            title: qsTr("Restore") + Retranslate.onLanguageChanged
+            imageSource: "images/menu/ic_restore.png"
+            
+            onTriggered: {
+                console.log("UserEvent: Restore");
+                filePicker.title = qsTr("Select File");
+                filePicker.mode = FilePickerMode.Picker
+                filePicker.open();
+                
+                reporter.record("Restore");
+            }
+            
+            function onFinished(ok)
+            {
+                if (ok) {
+                    Application.requestExit();
+                }
+            }
+            
+            function onRestored(result)
+            {
+                if (result.length > 0) {
+                    persist.showDialog( restore, qsTr("Restore Complete"), qsTr("The database was successfully restored. The app will close now so it can restart with the changes applied."), qsTr("OK"), "" );
+                } else {
+                    persist.showToast( qsTr("The database could not be restored. Please re-check the backup file to ensure it is valid, and if the problem persists please file a bug report. Make sure to attach the backup file with your report!"), "images/toast/error.png" );
+                }
+                
+                reporter.record("RestoreResult", result.toString());
+            }
         }
     ]
     
@@ -241,11 +305,12 @@ Page
         background: back.imagePaint
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
-        leftPadding: 10; rightPadding: 10;
         
         SegmentedControl
         {
             id: modeDropDown
+            horizontalAlignment: HorizontalAlignment.Fill
+            bottomMargin: 0
             
             onCreationCompleted: {
                 var primary = persist.getValueFor("mode");
@@ -458,6 +523,26 @@ Page
                     
                     dashPage.removeAllActions();
                     dashPage.parent.pop();
+                }
+            }
+        },
+        
+        FilePicker {
+            id: filePicker
+            defaultType: FileType.Other
+            filter: ["*.sb"]
+            
+            directories :  {
+                return ["/accounts/1000/removable/sdcard", "/accounts/1000/shared/misc"]
+            }
+            
+            onFileSelected : {
+                console.log("UserEvent: FileSelected", selectedFiles[0]);
+                
+                if (mode == FilePickerMode.Picker) {
+                    app.backup(restore, "onRestored", selectedFiles[0], true);
+                } else {
+                    app.backup(backup, "onSaved", selectedFiles[0], false);
                 }
             }
         }

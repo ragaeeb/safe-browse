@@ -6,6 +6,8 @@ Page
     id: viewLogPage
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     
+    function cleanUp() {}
+    
     onCreationCompleted: {
         deviceUtils.attachTopBottomKeys(viewLogPage, listView);
     }

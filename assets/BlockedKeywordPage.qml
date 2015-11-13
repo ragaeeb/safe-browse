@@ -7,6 +7,8 @@ Page
     id: root
     actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
     
+    function cleanUp() {}
+    
     function onDataLoaded(id, data)
     {
         if (id == QueryId.GetKeywords)

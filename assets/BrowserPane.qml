@@ -26,7 +26,7 @@ NavigationPane
     }
     
     onPopTransitionEnded: {
-        page.destroy();
+        deviceUtils.cleanUpAndDestroy(page);
     }
     
     function showBlockedPage()
