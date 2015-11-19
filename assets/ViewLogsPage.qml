@@ -131,7 +131,7 @@ Page
                     type: "requested"
                     
                     LogListItem {
-                        imageSource: "images/ic_browse.png";
+                        imageSource: "images/list/ic_browse.png";
                         title: qsTr("Requested") + Retranslate.onLanguageChanged
                     }
                 },

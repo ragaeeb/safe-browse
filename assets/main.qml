@@ -1,4 +1,4 @@
-import bb.cascades 1.2
+import bb.cascades 1.3
 
 TabbedPane
 {
@@ -11,6 +11,15 @@ TabbedPane
             newDefinition.targetUrl = target;
             newTab.triggered();
         }
+    }
+    
+    function onSidebarVisualStateChanged()
+    {
+        sidebarStateChanged.disconnect(onSidebarVisualStateChanged);
+
+        tutorial.exec("tabsNew", qsTr("To browse a website in a separate tab, tap on the '%1' tab.").arg(newTab.title), HorizontalAlignment.Left, VerticalAlignment.Center, ui.du(3), 0, 0, ui.du(3) );
+
+        reporter.record( "TabbedPaneExpanded", root.sidebarVisualState.toString() );
     }
     
     Menu.definition: CanadaIncMenu
@@ -34,11 +43,11 @@ TabbedPane
                 var sheet = definition.createObject();
                 sheet.closed.connect(onClosed);
                 sheet.open();
+                
+                tutorial.execCentered("adminPassword", qsTr("You are required to set an administrator password. This is going to be needed everytime you want to access the %1 settings to change the filtering rules and other administrative tasks.").arg(Application.applicationName), "images/ic_password.png");
             } else {
-                //if ( persist.tutorial( "tutorialSettings", qsTr("If you want to manage the list of websites that should be allowed or blocked, swipe-down from the top-bezel and go to Settings."), "asset:///images/menu/ic_settings.png" ) ) {}
-                //else if ( persist.tutorial( "tutorialPinHomeScreen", qsTr("To bookmark a page, you can choose 'Pin to Homescreen' from the menu."), "asset:///images/menu/ic_pin.png" ) ) {}
-                //else if ( persist.tutorial( "tutorialNewTab", qsTr("You can have more than one tab open! Swipe towards the right by dragging the menu on the left, and tap on 'New Tab' to open a new page to browse."), "asset:///images/tabs/ic_new_tab.png" ) ) {}
-                //else if ( persist.tutorial( "tutorialBrowse", qsTr("Tap on the Browse icon at the bottom to enter a new address to visit."), "asset:///images/ic_globe.png" ) ) {}
+                tutorial.execAppMenu();
+                tutorial.execActionBar("expandTabs", qsTr("Tap here to expand the tabs to be able to browse on more than one website at the same time."), "b" );
             }
             
             browseTab.delegateActivationPolicy = TabDelegateActivationPolicy.ActivateWhenSelected;
@@ -47,6 +56,8 @@ TabbedPane
             if (target) {
                 activePane.target = target;
             }
+            
+            sidebarStateChanged.connect(onSidebarVisualStateChanged);
         }
     }
     
@@ -94,7 +105,8 @@ TabbedPane
                         }
                         
                         onObjectChanged: {
-                            if (object) {
+                            if (object)
+                            {
                                 object.closeTab.connect(onClose);
                                 object.showClose = true;
                                 

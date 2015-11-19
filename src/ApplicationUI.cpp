@@ -55,6 +55,7 @@ void ApplicationUI::lazyInit()
 
     m_helper.initDatabase();
 
+    m_invoke.registerQmlTypes();
     m_invoke.process();
 
     AppLogFetcher::create( &m_persistance, &ThreadUtils::compressFiles, this );
