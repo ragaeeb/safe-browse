@@ -42,6 +42,10 @@ Page
                     detailsView.url = request;
                 }
             }
+            
+            onTextChanging: {
+                showPlaceHolder = false;
+            }
         },
         
         ActionItem {
@@ -51,7 +55,8 @@ Page
             ActionBar.placement: ActionBarPlacement.OnBar
             
             shortcuts: [
-                SystemShortcut {
+                SystemShortcut
+                {
                     type: SystemShortcuts.PreviousSection
                     
                     onTriggered: {
@@ -67,7 +72,8 @@ Page
             }
         },
         
-        ActionItem {
+        ActionItem
+        {
             title: qsTr("Forward") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_forward.png"
             enabled: detailsView.canGoForward
@@ -90,7 +96,9 @@ Page
             }
         },
         
-        ActionItem {
+        ActionItem
+        {
+            id: refresh
             title: qsTr("Refresh") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_refresh.png"
             
@@ -115,11 +123,22 @@ Page
         }
     ]
     
+    onActionMenuVisualStateChanged: {
+        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
+            tutorial.exec( "refresh", qsTr("Tap on the '%1' action to refresh the currently displayed page.").arg(refresh.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, refresh.imageSource.toString() );
+            tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, "images/menu/ic_pin.png" );
+        }
+        
+        reporter.record("AyatPageMenuOpened", actionMenuVisualState.toString());
+    }
+    
     onCreationCompleted: {
         if (!deviceUtils.isPhysicalKeyboardDevice) {
             addAction(jumpTop);
             addAction(jumpBottom);
         }
+        
+        tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "o");
     }
     
     Container
@@ -196,7 +215,7 @@ Page
         {
             id: placeHolder
             labelText: qsTr("Please enter a URL on the address bar below...") + Retranslate.onLanguageChanged
-            graphic: "images/ic_browse.png"
+            graphic: "images/list/ic_browse.png"
             
             onImageTapped: {
                 console.log("UserEvent: EnterUrlPlaceHolderTapped");
