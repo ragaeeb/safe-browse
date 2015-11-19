@@ -54,6 +54,12 @@ Page
             enabled: detailsView.canGoBack
             ActionBar.placement: ActionBarPlacement.OnBar
             
+            onEnabledChanged: {
+                if (enabled) {
+                    tutorial.exec("goBack", qsTr("Tap here to go back to the previous page."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, ui.du(19), 0, ui.du(1) );
+                }
+            }
+            
             shortcuts: [
                 SystemShortcut
                 {
@@ -78,6 +84,12 @@ Page
             imageSource: "images/menu/ic_forward.png"
             enabled: detailsView.canGoForward
             ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onEnabledChanged: {
+                if (enabled) {
+                    tutorial.exec("goForward", qsTr("Tap here to go forward to the page you visited after the previous one."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, ui.du(10), 0, ui.du(1) );
+                }
+            }
             
             shortcuts: [
                 SystemShortcut {
@@ -139,6 +151,7 @@ Page
         }
         
         tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "o");
+        tutorial.execSwipe("addressBar", qsTr("Type the address of the website you wish to visit here."), HorizontalAlignment.Center, VerticalAlignment.Bottom, "r");
     }
     
     Container
