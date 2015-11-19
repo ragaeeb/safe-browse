@@ -6,6 +6,13 @@ TabbedPane
     showTabsOnActionBar: false
     property variant target
     
+    onTargetChanged: {
+        if (target && browseTab.delegateActivationPolicy == TabDelegateActivationPolicy.ActivateWhenSelected) { // already initialized, and user decides to open another shortcut from home screen
+            newDefinition.targetUrl = target;
+            newTab.triggered();
+        }
+    }
+    
     Menu.definition: CanadaIncMenu
     {
         id: menuDef
@@ -65,6 +72,7 @@ TabbedPane
             ComponentDefinition
             {
                 id: newDefinition
+                property variant targetUrl
                 
                 Tab {
                     id: newTabContent
@@ -89,7 +97,13 @@ TabbedPane
                             if (object) {
                                 object.closeTab.connect(onClose);
                                 object.showClose = true;
-                                object.promptForAddress();
+                                
+                                if (newDefinition.targetUrl) {
+                                    object.target = newDefinition.targetUrl;
+                                    newDefinition.targetUrl = undefined;
+                                } else {
+                                    object.promptForAddress();
+                                }
                             }
                         }
                     }

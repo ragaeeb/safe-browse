@@ -3,6 +3,7 @@
 #include "ThreadUtils.h"
 #include "AppLogFetcher.h"
 #include "CommonConstants.h"
+#include "IOUtils.h"
 #include "Logger.h"
 #include "JlCompress.h"
 #include "Report.h"
@@ -39,7 +40,6 @@ BackupStruct ThreadUtils::compressDatabase(BackupStruct bs)
 
 BackupStruct ThreadUtils::performRestore(BackupStruct bs)
 {
-    LOGGER("*** SDLKLJ" << bs.destination);
     QStringList files = JlCompress::extractDir( bs.destination, QDir::homePath(), BACKUP_ZIP_PASSWORD );
 
     if ( files.isEmpty() ) {
@@ -49,5 +49,16 @@ BackupStruct ThreadUtils::performRestore(BackupStruct bs)
     return bs;
 }
 
+
+QUrl ThreadUtils::writeFile(QVariant const& cookie, QByteArray const& data)
+{
+    QString uri = cookie.toString();
+    QString fileName = uri.split("/").last();
+    fileName = QString("%1/%2").arg( QDir::tempPath() ).arg(fileName);
+
+    canadainc::IOUtils::writeFile(fileName, data);
+
+    return QUrl::fromLocalFile(fileName);
+}
 
 } /* namespace autoblock */
