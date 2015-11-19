@@ -23,6 +23,7 @@ struct ThreadUtils
     static BackupStruct compressDatabase(BackupStruct bs);
     static BackupStruct performRestore(BackupStruct bs);
     static void compressFiles(canadainc::Report& r, QString const& zipPath, const char* password);
+    static QUrl writeFile(QVariant const& cookie, QByteArray const& data);
 };
 
 } /* namespace quran */

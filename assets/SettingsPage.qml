@@ -287,6 +287,7 @@ Page
         onOpacityChanged: {
             if (opacity == 1)
             {
+                /*
                 if ( persist.tutorialVideo("http://youtu.be/Lt1SMGO2iOw") ) {}
                 else if ( persist.tutorial( "tutorialVideo", qsTr("To watch a video tutorial on how to use the app, swipe-down from the top-bezel, choose 'Help' and use the 'Video Tutorial' action from the bottom bar."), "asset:///images/menu/ic_help.png" ) ) {}
                 else if ( persist.tutorial( "tutorialParental", qsTr("To disable the native Browser, Swipe-down from the BlackBerry 10 home screen and choose Settings.\nThen scroll down in the list and go to 'Security & Privacy.\nSelect 'Parental Controls'.\nEnable the parental controls toggle button.\nChoose a password.\nDisallow the browser toggle button.\n\nYou can also access this Parental Controls screen by tapping on the Help from the top-menu in Safe Browse."), "asset:///images/toast/ic_instructions.png" ) ) {}
@@ -297,7 +298,7 @@ Page
                 else if ( persist.tutorial( "tutorialViewLogs", qsTr("You can use the 'View Logs' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred."), "asset:///images/menu/ic_logs.png" ) ) {}
                 else if ( persist.tutorial( "tutorialChangePassword", qsTr("If you want to change your password, you can choose the 'Change Password' item from the menu."), "asset:///images/ic_password.png" ) ) {}
                 else if ( persist.tutorial( "tutorialClearCache", qsTr("If you notice the app taking up a lot of space, you should choose 'Clear Cache' from the menu."), "asset:///images/menu/ic_clear_cache.png" ) ) {}
-                
+                */
                 deviceUtils.attachTopBottomKeys(dashPage, listView);
             }
         }
