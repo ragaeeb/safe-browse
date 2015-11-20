@@ -145,13 +145,14 @@ Page
     }
     
     onCreationCompleted: {
-        if (!deviceUtils.isPhysicalKeyboardDevice) {
+        if (!deviceUtils.isPhysicalKeyboardDevice)
+        {
             addAction(jumpTop);
             addAction(jumpBottom);
         }
         
         tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "o");
-        tutorial.execSwipe("addressBar", qsTr("Type the address of the website you wish to visit here."), HorizontalAlignment.Center, VerticalAlignment.Bottom, "r");
+        tutorial.exec("addressBar", qsTr("Type the address of the website you wish to visit here."), HorizontalAlignment.Left, VerticalAlignment.Bottom, ui.du(10), 0, 0, ui.du(1), undefined, "r");
     }
     
     Container

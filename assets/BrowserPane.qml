@@ -29,10 +29,10 @@ NavigationPane
         deviceUtils.cleanUpAndDestroy(page);
     }
     
-    function showBlockedPage()
+    function showBlockedPage(context)
     {
         var uri = browsePage.webView.url.toString();
-        browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style></head><body><br><br><br>Blocked: %1!</body></html>".arg(uri);
+        browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style></head><body><br><br><br>%1</body></html>".arg(context);
         helper.logBlocked(navigationPane, uri);
     }
     
@@ -42,10 +42,10 @@ NavigationPane
         
         if ( id == QueryId.LookupDomain && ( (mode == "passive" && data.length > 0) || (mode == "controlled" && data.length == 0) ) ) {
             reporter.record("BlockedByDomain");
-            showBlockedPage();
+            showBlockedPage( qsTr("Website blocked because the following domain is not allowed: %1").arg( data.length > 0 ? data[0].uri : browsePage.webView.url.toString() ) );
         } else if (id == QueryId.LookupKeywords && data.length >= helper.threshold) {
             reporter.record("BlockedByKeyword");
-            showBlockedPage();
+            showBlockedPage( qsTr("Website blocked because the following keyword is not allowed: %1").arg(data[0].term) );
         }
     }
     
