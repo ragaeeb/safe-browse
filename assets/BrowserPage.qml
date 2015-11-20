@@ -137,8 +137,9 @@ Page
     ]
     
     onActionMenuVisualStateChanged: {
-        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
-            tutorial.exec( "refresh", qsTr("Tap on the '%1' action to refresh the currently displayed page.").arg(refresh.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, refresh.imageSource.toString() );
+        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull)
+        {
+            tutorial.execOverFlow( "refresh", qsTr("Tap on the '%1' action to refresh the currently displayed page."), refresh );
             tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, "images/menu/ic_pin.png" );
         }
         

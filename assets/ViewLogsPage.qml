@@ -14,7 +14,7 @@ Page
     
     onActionMenuVisualStateChanged: {
         if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
-            tutorial.exec( "clearLogs", qsTr("Tap on the '%1' action to clear all the logs.").arg(clearLogsAction.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, clearLogsAction.imageSource.toString() );
+            tutorial.execOverFlow( "clearLogs", qsTr("Tap on the '%1' action to clear all the logs."), clearLogsAction );
         }
     }
     

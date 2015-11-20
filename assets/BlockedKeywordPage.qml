@@ -11,7 +11,7 @@ Page
     
     onActionMenuVisualStateChanged: {
         if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
-            tutorial.exec( "clearAllKeywords", qsTr("Tap on the '%1' action to clear all the the keywords.").arg(unblockAllAction.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, unblockAllAction.imageSource.toString() );
+            tutorial.execOverFlow( "clearAllKeywords", qsTr("Tap on the '%1' action to clear all the the keywords."), unblockAllAction );
         }
     }
     
