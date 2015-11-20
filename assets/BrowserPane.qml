@@ -32,6 +32,7 @@ NavigationPane
     function showBlockedPage(context)
     {
         var uri = browsePage.webView.url.toString();
+        browsePage.blockerVisible = true;
         browsePage.webView.html = "<html><head><title>Blocked!</title><style>* { margin: 0px; padding 0px; }body { font-size: 48px; font-family: monospace; border: 1px solid #444; padding: 4px; }</style></head><body><br><br><br>%1</body></html>".arg(context);
         helper.logBlocked(navigationPane, uri);
     }
@@ -46,6 +47,8 @@ NavigationPane
         } else if (id == QueryId.LookupKeywords && data.length >= helper.threshold) {
             reporter.record("BlockedByKeyword");
             showBlockedPage( qsTr("Website blocked because the following keyword is not allowed: %1").arg(data[0].term) );
+        } else {
+            browsePage.blockerVisible = false;
         }
     }
     
@@ -89,12 +92,17 @@ NavigationPane
         }
         
         webView.onUrlChanged: {
-            helper.analyze(navigationPane, url);
+            if ( url.toString().indexOf("local://") == -1 ) {
+                helper.analyze(navigationPane, url);
+            }
         }
         
         webView.onTitleChanged: {
             navigationPane.parent.description = title;
-            helper.analyzeKeywords(navigationPane, title);
+            
+            if ( webView.url.toString().indexOf("local://") == -1 ) {
+                helper.analyzeKeywords(navigationPane, title);
+            }
         }
         
         actions: [
