@@ -20,10 +20,14 @@ Page
     onActionMenuVisualStateChanged: {
         if (actionMenuVisualState == ActionMenuVisualState.VisibleFull)
         {
-            tutorial.exec( "changePassword", qsTr("If you want to change the administrative password, you can choose the '%1' item from the menu.").arg(changePassword.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, changePassword.imageSource.toString() );
-            tutorial.exec( "viewLogs", qsTr("You can use the '%1' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred.").arg(viewLogs.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, viewLogs.imageSource.toString() );
-            tutorial.exec( "backup", qsTr("You can use the '%1' action at the bottom if you want to save your blocked websites, and keywords to a file.").arg(backup.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, backup.imageSource.toString() );
-            tutorial.exec( "restore", qsTr("At a later date you can use the '%1' action to reimport the backup file to restore your database or you can apply it to other devices you want to port these settings into!").arg(restore.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, restore.imageSource.toString() );
+            tutorial.execOverFlow( "changePassword", qsTr("If you want to change the administrative password, you can choose the '%1' item from the menu."), changePassword );
+            tutorial.execOverFlow( "viewLogs", qsTr("You can use the '%1' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred."), viewLogs );
+            tutorial.execOverFlow( "backup", qsTr("You can use the '%1' action at the bottom if you want to save your blocked websites, and keywords to a file."), backup );
+            tutorial.execOverFlow( "restore", qsTr("At a later date you can use the '%1' action to reimport the backup file to restore your database or you can apply it to other devices you want to port these settings into!"), restore);
+            
+            if (modeDropDown.selectedOption == passive) {
+                tutorial.execOverFlow("blockedKeywords", qsTr("To block websites depending on keywords that appear in their website title, tap on the '%1' action."), blockedKeywords);
+            }
         }
         
         reporter.record("SettingsMenuOpened", actionMenuVisualState.toString());
@@ -120,6 +124,48 @@ Page
                     }
                 }
             ]
+        },
+        
+        ActionItem
+        {
+            id: safeRun
+            imageSource: "images/menu/ic_safe_run.png"
+            title: qsTr("Safe Run") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            function onPopTransitionEnded(page)
+            {
+                if (dashPage.parent.top == dashPage) {
+                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
+                }
+            }
+            
+            function onFinished(ok)
+            {
+                if (ok)
+                {
+                    definition.source = "SafeRunPage.qml";
+                    var safeRunPage = definition.createObject();
+                    dashPage.parent.push(safeRunPage);
+                    
+                    safeRunPage.targetPrompt.show();
+                    dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
+                }
+            }
+            
+            onTriggered: {
+                console.log("UserEvent: SafeRun");
+                reporter.record("SafeRun");
+                var message;
+                
+                if (helper.mode == "passive") {
+                    message = qsTr("Go through and browse all the pages that you want to block. They will be added one by one automatically. When you finish simply close the page.");
+                } else {
+                    message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
+                }
+                
+                persist.showDialog( safeRun, title, message, qsTr("OK"), "" );
+            }
         },
         
         ActionItem
@@ -314,18 +360,17 @@ Page
                         }
                     }
                     
-                    dashPage.removeAction(safeRun);
                     dashPage.removeAction(blockedKeywords);
                     
                     if (selectedValue == controlled.value)
                     {
                         dashPage.addAction(safeRun);
                         tutorial.execActionBar( "addAllowed", qsTr("Tap here to add an allowed website.") );
-                        tutorial.execActionBar("safeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "r");
+                        tutorial.execActionBar("safeRun", qsTr("To quickly add a bunch of allowed websites tap on the '%1' icon from the menu.").arg(safeRun.title), "r");
                     } else if (selectedValue == passive.value) {
                         dashPage.addAction(blockedKeywords);
                         tutorial.execActionBar( "addBlocked", qsTr("Tap here to add a domain you wish to disallow and prevent users from accessing.") );
-                        tutorial.execActionBar("blockedKeywords", qsTr("To block websites depending on keywords that appear in their website title, tap on the '%1' action.").arg(blockedKeywords.title), "r");
+                        tutorial.execActionBar("safeRun", qsTr("To quickly add a bunch of disallowed websites tap on the '%1' icon from the menu.").arg(safeRun.title), "r");
                     }
                     
                     helper.fetchAllBlocked(listView, selectedValue);
@@ -540,52 +585,9 @@ Page
         
         ActionItem
         {
-            id: safeRun
-            imageSource: "images/menu/ic_safe_run.png"
-            title: qsTr("Safe Run") + Retranslate.onLanguageChanged
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            function onPopTransitionEnded(page)
-            {
-                if (dashPage.parent.top == dashPage) {
-                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
-                }
-            }
-            
-            function onFinished(ok)
-            {
-                if (ok)
-                {
-                    definition.source = "SafeRunPage.qml";
-                    var safeRun = definition.createObject();
-                    dashPage.parent.push(safeRun);
-                    
-                    safeRun.targetPrompt.show();
-                    dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
-                }
-            }
-            
-            onTriggered: {
-                console.log("UserEvent: SafeRun");
-                reporter.record("SafeRun");
-                var message;
-                
-                if (helper.mode == "passive") {
-                    message = qsTr("Go through and browse all the pages that you want to block. They will be added one by one automatically. When you finish simply close the page.");
-                } else {
-                    message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
-                }
-                
-                persist.showDialog( safeRun, title, message, qsTr("OK"), "" );
-            }
-        },
-        
-        ActionItem
-        {
             id: blockedKeywords
             imageSource: "images/menu/ic_keywords.png"
             title: qsTr("Blocked Keywords") + Retranslate.onLanguageChanged
-            ActionBar.placement: ActionBarPlacement.OnBar
             
             onTriggered: {
                 console.log("UserEvent: BlockedKeywords");
