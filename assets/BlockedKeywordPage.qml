@@ -1,4 +1,4 @@
-import bb.cascades 1.0
+import bb.cascades 1.3
 import bb.system 1.2
 import com.canadainc.data 1.0
 
@@ -9,6 +9,12 @@ Page
     
     function cleanUp() {}
     
+    onActionMenuVisualStateChanged: {
+        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
+            tutorial.exec( "clearAllKeywords", qsTr("Tap on the '%1' action to clear all the the keywords.").arg(unblockAllAction.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, unblockAllAction.imageSource.toString() );
+        }
+    }
+    
     function onDataLoaded(id, data)
     {
         if (id == QueryId.GetKeywords)
@@ -18,6 +24,14 @@ Page
             
             listView.visible = data.length > 0;
             emptyDelegate.delegateActive = data.length == 0;
+            
+            tutorial.execActionBar("addKeyword", qsTr("Use the '%1' action from the menu to add a specific keyword you want to block.").arg(addAction.title) );
+            tutorial.execBelowTitleBar("threshold", qsTr("This threshold slider controls the minimum number of keyword hits that must be matched on a website title before it is blocked.\n\nTo implement more aggressive blocking, decrease this threshold, to be more lenient and only block when multiple keywords are matched, increase the threshold"), 0, "l", "r");
+            
+            if ( !adm.isEmpty() )
+            {
+                tutorial.execActionBar("clearKeywordsMenu", qsTr("You can clear this blocked list by selecting '%1' from the menu.").arg(unblockAllAction.title), "x" );
+            }
         } else if (id == QueryId.InsertKeyword || id == QueryId.DeleteKeyword) {
             helper.fetchAllBlockedKeywords(root);
         }
@@ -217,8 +231,11 @@ Page
                 }
             }
             
-            multiSelectAction: MultiSelectActionItem {
-                imageSource: "images/menu/ic_select_more.png"
+            onTriggered: {
+                console.log("UserEvent: BlockedKeywordTapped", indexPath);
+                reporter.record("BlockedKeywordTapped");
+                multiSelectHandler.active = true;
+                toggleSelection(indexPath);
             }
             
             listItemComponents: [
@@ -258,32 +275,18 @@ Page
                                 slider.play();
                             }
                         }
-                        
-                        contextActions: [
-                            ActionSet
-                            {
-                                title: sli.title
-                                subtitle: sli.description
-                                
-                                DeleteActionItem
-                                {
-                                    imageSource: "images/menu/ic_unblock.png"
-                                    title: qsTr("Unblock") + Retranslate.onLanguageChanged
-                                    
-                                    onTriggered: {
-                                        console.log("UserEvent: UnblockKeyword");
-                                        reporter.record("UnblockKeyword");
-                                        sli.ListItem.view.unblock([ListItemData]);
-                                    }
-                                }
-                            }
-                        ]
                     }
                 }
             ]
             
             multiSelectHandler
             {
+                onActiveChanged: {
+                    if (active) {
+                        tutorial.execActionBar( "unblockKeywords", qsTr("Tap here to remove these keywords from the list."), "x" );
+                    }
+                }
+                
                 actions: [
                     DeleteActionItem 
                     {

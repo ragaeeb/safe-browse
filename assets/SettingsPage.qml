@@ -361,8 +361,8 @@ Page
             }
             
             onTriggered: {
-                console.log("UserEvent: BlockedListItem Tapped", indexPath);
-                reporter.record("ExceptionUrl");
+                console.log("UserEvent: BlockedListItemTapped", indexPath);
+                reporter.record("ExceptionUrlTapped");
                 multiSelectHandler.active = true;
                 toggleSelection(indexPath);
             }
@@ -469,7 +469,7 @@ Page
                         }
                     }
                 } else if (id == QueryId.InsertEntry) {
-                    persist.showToast( qsTr("Successfully added entries!"), addAction.imageSource.toString() );
+                    persist.showToast( qsTr("Successfully added entries!"), "images/menu/ic_select_more.png" );
                     helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
                 } else if (id == QueryId.DeleteEntry) {
                     persist.showToast( qsTr("Successfully removed entries!"), unblockAction.imageSource.toString() );
