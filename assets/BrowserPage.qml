@@ -11,6 +11,7 @@ Page
     property alias browseField: browseAction
     property alias showPlaceHolder: placeHolder.delegateActive
     property alias webContainer: mainContainer.controls
+    property alias blockerVisible: blocker.visible
     
     function cleanUp() {}
     
@@ -141,7 +142,7 @@ Page
             tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, "images/menu/ic_pin.png" );
         }
         
-        reporter.record("AyatPageMenuOpened", actionMenuVisualState.toString());
+        reporter.record("BrowserMenuOpened", actionMenuVisualState.toString());
     }
     
     onCreationCompleted: {
@@ -260,6 +261,14 @@ Page
             opacity: value
             state: ProgressIndicatorState.Pause
             topMargin: 0; bottomMargin: 0; leftMargin: 0; rightMargin: 0;
+        }
+        
+        Container
+        {
+            id: blocker
+            horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
+            visible: false
         }
     }
     

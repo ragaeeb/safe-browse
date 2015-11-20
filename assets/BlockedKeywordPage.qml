@@ -71,6 +71,10 @@ Page
                             }
                         }
                     }
+                    
+                    Divider {
+                        topMargin: 0; bottomMargin: 0
+                    }
                 }
             }
         }

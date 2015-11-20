@@ -1,6 +1,6 @@
-import bb.cascades 1.0
-import bb.cascades.pickers 1.0
+import bb.cascades 1.3
 import bb.system 1.2
+import bb.cascades.pickers 1.0
 import com.canadainc.data 1.0
 
 Page
@@ -15,6 +15,18 @@ Page
         } else {
             guardianContainer.opacity = 1;
         }
+    }
+    
+    onActionMenuVisualStateChanged: {
+        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull)
+        {
+            tutorial.exec( "changePassword", qsTr("If you want to change the administrative password, you can choose the '%1' item from the menu.").arg(changePassword.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, changePassword.imageSource.toString() );
+            tutorial.exec( "viewLogs", qsTr("You can use the '%1' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred.").arg(viewLogs.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, viewLogs.imageSource.toString() );
+            tutorial.exec( "backup", qsTr("You can use the '%1' action at the bottom if you want to save your blocked websites, and keywords to a file.").arg(backup.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, backup.imageSource.toString() );
+            tutorial.exec( "restore", qsTr("At a later date you can use the '%1' action to reimport the backup file to restore your database or you can apply it to other devices you want to port these settings into!").arg(restore.title), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, restore.imageSource.toString() );
+        }
+        
+        reporter.record("SettingsMenuOpened", actionMenuVisualState.toString());
     }
     
     actions: [
@@ -112,48 +124,7 @@ Page
         
         ActionItem
         {
-            id: safeRun
-            imageSource: "images/menu/ic_safe_run.png"
-            title: qsTr("Safe Run") + Retranslate.onLanguageChanged
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            function onPopTransitionEnded(page)
-            {
-                if (dashPage.parent.top == dashPage) {
-                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
-                }
-            }
-            
-            function onFinished(ok)
-            {
-                if (ok)
-                {
-                    definition.source = "SafeRunPage.qml";
-                    var safeRun = definition.createObject();
-                    dashPage.parent.push(safeRun);
-                    
-                    safeRun.targetPrompt.show();
-                    dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
-                }
-            }
-            
-            onTriggered: {
-                console.log("UserEvent: SafeRun");
-                reporter.record("SafeRun");
-                var message;
-                
-                if (helper.mode == "passive") {
-                    message = qsTr("Go through and browse all the pages that you want to block. They will be added one by one automatically. When you finish simply close the page.");
-                } else {
-                    message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
-                }
-                
-                persist.showDialog( safeRun, title, message, qsTr("OK"), "" );
-            }
-        },
-        
-        ActionItem
-        {
+            id: changePassword
             imageSource: "images/ic_password.png"
             title: qsTr("Change Password") + Retranslate.onLanguageChanged
             
@@ -168,20 +139,7 @@ Page
         
         ActionItem
         {
-            imageSource: "images/menu/ic_keywords.png"
-            title: qsTr("Blocked Keywords") + Retranslate.onLanguageChanged
-            
-            onTriggered: {
-                console.log("UserEvent: BlockedKeywords");
-                reporter.record("BlockedKeywords");
-                definition.source = "BlockedKeywordPage.qml";
-                var keywords = definition.createObject();
-                dashPage.parent.push(keywords);
-            }
-        },
-        
-        ActionItem
-        {
+            id: viewLogs
             imageSource: "images/menu/ic_logs.png"
             title: qsTr("View Logs") + Retranslate.onLanguageChanged
             
@@ -287,18 +245,28 @@ Page
         onOpacityChanged: {
             if (opacity == 1)
             {
-                /*
-                if ( persist.tutorialVideo("http://youtu.be/Lt1SMGO2iOw") ) {}
-                else if ( persist.tutorial( "tutorialVideo", qsTr("To watch a video tutorial on how to use the app, swipe-down from the top-bezel, choose 'Help' and use the 'Video Tutorial' action from the bottom bar."), "asset:///images/menu/ic_help.png" ) ) {}
-                else if ( persist.tutorial( "tutorialParental", qsTr("To disable the native Browser, Swipe-down from the BlackBerry 10 home screen and choose Settings.\nThen scroll down in the list and go to 'Security & Privacy.\nSelect 'Parental Controls'.\nEnable the parental controls toggle button.\nChoose a password.\nDisallow the browser toggle button.\n\nYou can also access this Parental Controls screen by tapping on the Help from the top-menu in Safe Browse."), "asset:///images/toast/ic_instructions.png" ) ) {}
-                else if ( persist.tutorial( "tutorialInstallApp", qsTr("For added security you might also want to disable the 'Install Application' toggle button from the Parental Controls so that no one can download additional web browsing apps."), "asset:///images/toast/ic_instructions.png" ) ) {}
-                else if ( persist.tutorial( "tutorialRemoveApp", qsTr("For added security you might also want to disable the 'Remove Application' toggle button from the Parental Controls so that no one can delete this app and get rid of all your blocking settings."), "asset:///images/toast/ic_instructions.png" ) ) {}
-                else if ( persist.tutorial( "tutorialPassive", qsTr("If you want to allow all websites except certain ones, choose 'Passive' from the Browsing Mode dropdown."), "asset:///images/dropdown/ic_passive.png" ) ) {}
-                else if ( persist.tutorial( "tutorialControlled", qsTr("If you want to block all websites except certain ones, choose 'Controlled' from the Browsing Mode dropdown."), "asset:///images/dropdown/ic_controlled.png" ) ) {}
-                else if ( persist.tutorial( "tutorialViewLogs", qsTr("You can use the 'View Logs' from the menu to see all the list of websites that were accessed, blocked, and the failed login attempts to have occurred."), "asset:///images/menu/ic_logs.png" ) ) {}
-                else if ( persist.tutorial( "tutorialChangePassword", qsTr("If you want to change your password, you can choose the 'Change Password' item from the menu."), "asset:///images/ic_password.png" ) ) {}
-                else if ( persist.tutorial( "tutorialClearCache", qsTr("If you notice the app taking up a lot of space, you should choose 'Clear Cache' from the menu."), "asset:///images/menu/ic_clear_cache.png" ) ) {}
-                */
+                var primary = persist.getValueFor("mode");
+                
+                for (var i = modeDropDown.count()-1; i >= 0; i--)
+                {
+                    if ( modeDropDown.at(i).value == primary )
+                    {
+                        modeDropDown.selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                modeDropDown.selectedValueChanged(modeDropDown.selectedValue);
+                
+                tutorial.execCentered( "parental", qsTr("To disable the native Browser, Swipe-down from the BlackBerry 10 home screen and choose Settings.\nThen scroll down in the list and go to 'Security & Privacy.\nSelect 'Parental Controls'.\nEnable the parental controls toggle button.\nChoose a password.\nDisallow the browser toggle button.\n\nYou can also access this Parental Controls screen by tapping on the Help from the top-menu in Safe Browse."), "images/toast/ic_instructions.png" );
+                tutorial.execCentered( "installApp", qsTr("For added security you might also want to disable the 'Install Application' toggle button from the Parental Controls so that no one can download additional web browsing apps."), "images/toast/prevent_install.png" );
+                tutorial.execCentered( "removeApp", qsTr("For added security you might also want to disable the 'Remove Application' toggle button from the Parental Controls so that no one can delete this app and get rid of all your blocking settings."), "images/toast/prevent_app_remove.png" );
+                tutorial.execActionBar( "moreAdminOptions", qsTr("Tap here for additional administrative options."), "x" );
+                tutorial.execActionBar( "homepage", qsTr("Tap here to set the website that shows up when the app first loads.\n\nNote that if you are in the '%1' mode, you need to ensure that you allow this homepage.").arg(controlled.text), "l" );
+                tutorial.execBelowTitleBar("passive", qsTr("If you want to allow all websites except certain ones, choose '%1' in the segmented control.").arg(passive.text), 0, "l");
+                tutorial.execBelowTitleBar("controlled", qsTr("If you want to block all websites except certain ones, choose '%1' in the segmented control").arg(controlled.text), 0, "r");
+                tutorial.execActionBar("settingsBack", qsTr("To return to the main browsing page tap on the Back button here."), "b" );
+
                 deviceUtils.attachTopBottomKeys(dashPage, listView);
             }
         }
@@ -312,19 +280,7 @@ Page
             id: modeDropDown
             horizontalAlignment: HorizontalAlignment.Fill
             bottomMargin: 0
-            
-            onCreationCompleted: {
-                var primary = persist.getValueFor("mode");
-                
-                for (var i = count()-1; i >= 0; i--)
-                {
-                    if ( at(i).value == primary )
-                    {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-            }
+            selectedOption: null
             
             Option {
                 id: passive
@@ -343,21 +299,37 @@ Page
             }
             
             onSelectedValueChanged: {
-                var diff = persist.saveValueFor("mode", selectedValue);
-                
-                if (diff)
+                if (guardianContainer.opacity == 1)
                 {
-                    if (selectedValue == "passive") {
-                        persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), "images/dropdown/ic_passive.png" );
-                    } else if (selectedValue == "controlled") {
-                        if ( persist.tutorial( "tutorialSafeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "asset:///images/menu/ic_safe_run.png" ) ) {}
-                        persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), "images/dropdown/ic_controlled.png" );
+                    var diff = persist.saveValueFor("mode", selectedValue);
+                    
+                    if (diff)
+                    {
+                        reporter.record("BrowsingMode", selectedValue);
+                        
+                        if (selectedValue == controlled.value) {
+                            persist.showToast( qsTr("All websites will be allowed except the ones you choose to block."), passive.imageSource.toString() );
+                        } else if (selectedValue == passive.value) {
+                            persist.showToast( qsTr("All websites will be blocked except the ones you choose to allow."), controlled.imageSource.toString() );
+                        }
                     }
                     
-                    reporter.record("BrowsingMode", selectedValue);
+                    dashPage.removeAction(safeRun);
+                    dashPage.removeAction(blockedKeywords);
+                    
+                    if (selectedValue == controlled.value)
+                    {
+                        dashPage.addAction(safeRun);
+                        tutorial.execActionBar( "addAllowed", qsTr("Tap here to add an allowed website.") );
+                        tutorial.execActionBar("safeRun", qsTr("To quickly add a bunch of allowed websites tap on the Safe Run icon from the menu."), "r");
+                    } else if (selectedValue == passive.value) {
+                        dashPage.addAction(blockedKeywords);
+                        tutorial.execActionBar( "addBlocked", qsTr("Tap here to add a domain you wish to disallow and prevent users from accessing.") );
+                        tutorial.execActionBar("blockedKeywords", qsTr("To block websites depending on keywords that appear in their website title, tap on the '%1' action.").arg(blockedKeywords.title), "r");
+                    }
+                    
+                    helper.fetchAllBlocked(listView, selectedValue);
                 }
-                
-                helper.fetchAllBlocked(listView, selectedValue);
             }
         }
         
@@ -382,6 +354,7 @@ Page
         {
             id: listView
             scrollRole: ScrollRole.Main
+            property alias filterMode: modeDropDown.selectedValue
             
             dataModel: ArrayDataModel {
                 id: adm
@@ -389,13 +362,19 @@ Page
             
             onTriggered: {
                 console.log("UserEvent: BlockedListItem Tapped", indexPath);
-                reporter.record("ExceptionUrlTriggered");
+                reporter.record("ExceptionUrl");
                 multiSelectHandler.active = true;
                 toggleSelection(indexPath);
             }
             
             multiSelectHandler
             {
+                onActiveChanged: {
+                    if (active) {
+                        tutorial.execActionBar( "unblock", qsTr("Tap here to remove these elements from the list."), "x" );
+                    }
+                }
+                
                 actions: [
                     DeleteActionItem 
                     {
@@ -435,8 +414,8 @@ Page
                     StandardListItem
                     {
                         id: rootItem
-                        imageSource: "images/ic_browse.png";
-                        description: ListItemData.uri
+                        imageSource: ListItem.view.filterMode == "controlled" ? "images/list/site_allowed.png" : "images/list/site_blocked.png"
+                        title: ListItemData.uri
                         
                         ListItem.onInitializedChanged: {
                             if (initialized) {
@@ -480,10 +459,20 @@ Page
                     
                     listView.visible = !adm.isEmpty();
                     noElements.delegateActive = !listView.visible;
-                    if ( !adm.isEmpty() && persist.tutorial( "tutorialRemoveBlocked", qsTr("To remove a blocked site from the list, tap on it and choose 'Delete' from the menu."), "asset:///images/menu/ic_unblock.png" ) ) {}
+
+                    if ( !adm.isEmpty() )
+                    {
+                        if (modeDropDown.selectedValue == controlled.value) {
+                            tutorial.execBelowTitleBar( "removeException", qsTr("To remove an allowed website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), ui.du(8) );
+                        } else if (modeDropDown.selectedValue == passive.value) {
+                            tutorial.execBelowTitleBar( "removeBlocked", qsTr("To remove an blocked website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), ui.du(8) );
+                        }
+                    }
                 } else if (id == QueryId.InsertEntry) {
+                    persist.showToast( qsTr("Successfully added entries!"), addAction.imageSource.toString() );
                     helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
                 } else if (id == QueryId.DeleteEntry) {
+                    persist.showToast( qsTr("Successfully removed entries!"), unblockAction.imageSource.toString() );
                     helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
                 }
             }
@@ -508,6 +497,7 @@ Page
                 {
                     var password = inputFieldTextEntry().trim();
                     var loggedIn = security.login(password);
+                    console.log("LoginResult", loggedIn);
 
                     if (!loggedIn)
                     {
@@ -545,6 +535,64 @@ Page
                 } else {
                     app.backup(backup, "onSaved", selectedFiles[0], false);
                 }
+            }
+        },
+        
+        ActionItem
+        {
+            id: safeRun
+            imageSource: "images/menu/ic_safe_run.png"
+            title: qsTr("Safe Run") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            function onPopTransitionEnded(page)
+            {
+                if (dashPage.parent.top == dashPage) {
+                    helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
+                }
+            }
+            
+            function onFinished(ok)
+            {
+                if (ok)
+                {
+                    definition.source = "SafeRunPage.qml";
+                    var safeRun = definition.createObject();
+                    dashPage.parent.push(safeRun);
+                    
+                    safeRun.targetPrompt.show();
+                    dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
+                }
+            }
+            
+            onTriggered: {
+                console.log("UserEvent: SafeRun");
+                reporter.record("SafeRun");
+                var message;
+                
+                if (helper.mode == "passive") {
+                    message = qsTr("Go through and browse all the pages that you want to block. They will be added one by one automatically. When you finish simply close the page.");
+                } else {
+                    message = qsTr("Go through and browse all the pages that you want to allow. They will be added one by one automatically. When you finish simply close the page.");
+                }
+                
+                persist.showDialog( safeRun, title, message, qsTr("OK"), "" );
+            }
+        },
+        
+        ActionItem
+        {
+            id: blockedKeywords
+            imageSource: "images/menu/ic_keywords.png"
+            title: qsTr("Blocked Keywords") + Retranslate.onLanguageChanged
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
+            onTriggered: {
+                console.log("UserEvent: BlockedKeywords");
+                reporter.record("BlockedKeywords");
+                definition.source = "BlockedKeywordPage.qml";
+                var keywords = definition.createObject();
+                dashPage.parent.push(keywords);
             }
         }
     ]

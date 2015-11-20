@@ -35,7 +35,7 @@ QtObject
                     app.addToHomeScreen(result, urlToPin, "images/icon_shortcut.png");
                 } else {
                     persist.showToast( qsTr("Invalid shortcut name entered"), "images/toast/error.png" );
-                    reporter.record("InvalidShortcut");
+                    reporter.record("InvalidShortcut", result);
                 }
             } else {
                 console.log("UserEvent: HomePromptCancel");

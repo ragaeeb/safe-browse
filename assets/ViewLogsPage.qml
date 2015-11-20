@@ -1,4 +1,4 @@
-import bb.cascades 1.0
+import bb.cascades 1.3
 import com.canadainc.data 1.0
 
 Page
@@ -10,6 +10,12 @@ Page
     
     onCreationCompleted: {
         deviceUtils.attachTopBottomKeys(viewLogPage, listView);
+    }
+    
+    onActionMenuVisualStateChanged: {
+        if (actionMenuVisualState == ActionMenuVisualState.VisibleFull) {
+            tutorial.execActionBar( "clearLogs", qsTr("Tap on the '%1' action to clear all the logs.").arg(clearLogsAction.title), "x" );
+        }
     }
     
     titleBar: TitleBar
@@ -156,6 +162,18 @@ Page
                     
                     listView.visible = !adm.isEmpty();
                     noElements.delegateActive = !listView.visible;
+                    
+                    if ( !adm.isEmpty() )
+                    {
+                        tutorial.execTitle( "viewAll", qsTr("To view all activity that was done within the app, use the '%1' filter.").arg(allFilter.text), "l" );
+                        tutorial.execTitle( "authentication", qsTr("To view all the login attempts within the app, use the '%1' filter.").arg(loginFilter.text) );
+                        tutorial.execTitle( "browsing", qsTr("To view all the browsing activity within the app, use the '%1' filter.").arg(browsingFilter.text) );
+                        tutorial.execTitle( "blocked", qsTr("To view all the websites that were blocked, use the '%1' filter.").arg(blockedFilter.text), "r" );
+                        tutorial.execActionBar("viewLogsBack", qsTr("To return to the administrative page tap on the Back button here."), "b" );
+                        tutorial.execActionBar("logsMenu", qsTr("To clear all the activity log, tap here to expand the menu."), "x" );
+                    }
+                } else if (id == QueryId.ClearLogs) {
+                    persist.showToast( qsTr("Successfully cleared the activity log."), clearLogsAction.imageSource.toString() );
                 }
             }
         }
