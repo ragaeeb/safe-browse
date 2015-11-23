@@ -26,11 +26,7 @@ TabbedPane
     {
         id: menuDef
         bbWorldID: "31243891"
-        help.imageSource: "images/common/ic_help.png"
-        help.title: qsTr("Help") + Retranslate.onLanguageChanged
         projectName: "safe-browse"
-        settings.imageSource: "images/common/ic_settings.png"
-        settings.title: qsTr("Settings") + Retranslate.onLanguageChanged
         
         function onClosed() {
             menuDef.settings.triggered();
