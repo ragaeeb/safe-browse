@@ -1,4 +1,4 @@
-import bb.cascades 1.3
+import bb.cascades 1.2
 
 TabbedPane
 {
@@ -17,7 +17,7 @@ TabbedPane
     {
         sidebarStateChanged.disconnect(onSidebarVisualStateChanged);
 
-        tutorial.exec("tabsNew", qsTr("To browse a website in a separate tab, tap on the '%1' tab.").arg(newTab.title), HorizontalAlignment.Left, VerticalAlignment.Center, ui.du(3), 0, 0, ui.du(3) );
+        tutorial.exec("tabsNew", qsTr("To browse a website in a separate tab, tap on the '%1' tab.").arg(newTab.title), HorizontalAlignment.Left, VerticalAlignment.Center, deviceUtils.du(3), 0, 0, deviceUtils.du(3) );
 
         reporter.record( "TabbedPaneExpanded", root.sidebarVisualState.toString() );
     }
@@ -27,6 +27,7 @@ TabbedPane
         id: menuDef
         bbWorldID: "31243891"
         projectName: "safe-browse"
+        helpPageQml: "SafeBrowseHelp.qml"
         
         function onClosed() {
             menuDef.settings.triggered();
@@ -44,6 +45,13 @@ TabbedPane
             } else {
                 tutorial.execAppMenu();
                 tutorial.execActionBar("expandTabs", qsTr("Tap here to expand the tabs to be able to browse on more than one website at the same time."), "b" );
+                
+                // browser page
+                tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "x");
+                
+                if (clean) {
+                    tutorial.promptVideo("https://youtu.be/M0rQZdmDnJE");
+                }
             }
             
             browseTab.delegateActivationPolicy = TabDelegateActivationPolicy.ActivateWhenSelected;
@@ -128,6 +136,7 @@ TabbedPane
         imageSource: "images/tabs/ic_globe.png"
         unreadContentCount: 0
         delegateActivationPolicy: TabDelegateActivationPolicy.None
+        
         
         onTriggered: {
             console.log("UserEvent: BrowseTab");
