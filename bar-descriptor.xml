@@ -39,7 +39,7 @@
 
     <!-- Fourth digit segment of the package version. First three segments are taken from the 
          <versionNumber> element.  Must be an integer from 0 to 2^16-1 -->
-    <buildId>0</buildId>
+    <buildId>1</buildId>
                  
     <!-- A string value (such as "v1", "2.5", or "Alpha 1") that represents the version of the application, as it should be shown to users. Optional. -->
     <!-- <versionLabel></versionLabel> -->
@@ -87,12 +87,12 @@
 
     <asset path="icon.png">icon.png</asset>
     <asset path="assets">assets</asset>
-    <asset path="../canadainc/assets/AboutTitleBar.qml">assets/AboutTitleBar.qml</asset>
     <asset path="../canadainc/assets/BugReportPage.qml">assets/BugReportPage.qml</asset>
     <asset path="../canadainc/assets/CanadaIncMenu.qml">assets/CanadaIncMenu.qml</asset>
     <asset path="../canadainc/assets/CanadaIncUtils.qml">assets/CanadaIncUtils.qml</asset>
     <asset path="../canadainc/assets/ClassicBackDelegate.qml">assets/ClassicBackDelegate.qml</asset>
     <asset path="../canadainc/assets/EmptyDelegate.qml">assets/EmptyDelegate.qml</asset>
+    <asset path="../canadainc/assets/HelpPage.qml">assets/HelpPage.qml</asset>
     <asset path="../canadainc/assets/OfflineDelegate.qml">assets/OfflineDelegate.qml</asset>
     <asset path="../canadainc/assets/PermissionToast.qml">assets/PermissionToast.qml</asset>
     <asset path="../canadainc/assets/PersistDropDown.qml">assets/PersistDropDown.qml</asset>

@@ -1,5 +1,4 @@
-import bb.cascades 1.3
-import bb.system 1.2
+import bb.cascades 1.2
 
 Page
 {
@@ -8,7 +7,7 @@ Page
     property alias webView: detailsView
     property alias currentProgress: progressIndicator.value
     property alias totalProgress: progressIndicator.toValue
-    property alias browseField: browseAction
+    property alias browseField: browseAction.object
     property alias showPlaceHolder: placeHolder.delegateActive
     property alias webContainer: mainContainer.controls
     property alias blockerVisible: blocker.visible
@@ -22,33 +21,6 @@ Page
     }
     
     actions: [
-        TextInputActionItem
-        {
-            id: browseAction
-            hintText: qsTr("Enter URL...") + Retranslate.onLanguageChanged
-            input.submitKey: SubmitKey.Submit
-            input.keyLayout: KeyLayout.Url
-            content.flags: TextContentFlag.ActiveTextOff | TextContentFlag.EmoticonsOff
-            input.submitKeyFocusBehavior: SubmitKeyFocusBehavior.Lose
-            input.onSubmitted: {
-                reporter.record("UrlSubmitted");
-                
-                var request = text.trim();
-                if (request.length > 0)
-                {
-                    if (request.indexOf("http://") != 0) {
-                        request = "http://" + request;
-                    }
-                    
-                    detailsView.url = request;
-                }
-            }
-            
-            onTextChanging: {
-                showPlaceHolder = false;
-            }
-        },
-        
         ActionItem {
             title: qsTr("Back") + Retranslate.onLanguageChanged
             imageSource: "images/menu/ic_back.png"
@@ -57,7 +29,7 @@ Page
             
             onEnabledChanged: {
                 if (enabled) {
-                    tutorial.exec("goBack", qsTr("Tap here to go back to the previous page."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, ui.du(19), 0, ui.du(1) );
+                    tutorial.exec("goBack", qsTr("Tap here to go back to the previous page."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, deviceUtils.du(19), 0, deviceUtils.du(1) );
                 }
             }
             
@@ -88,7 +60,7 @@ Page
             
             onEnabledChanged: {
                 if (enabled) {
-                    tutorial.exec("goForward", qsTr("Tap here to go forward to the page you visited after the previous one."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, ui.du(10), 0, ui.du(1) );
+                    tutorial.exec("goForward", qsTr("Tap here to go forward to the page you visited after the previous one."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, deviceUtils.du(10), 0, deviceUtils.du(1) );
                 }
             }
             
@@ -140,7 +112,7 @@ Page
         if (actionMenuVisualState == ActionMenuVisualState.VisibleFull)
         {
             tutorial.execOverFlow( "refresh", qsTr("Tap on the '%1' action to refresh the currently displayed page."), refresh );
-            tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, ui.du(2), 0, 0, "images/menu/ic_pin.png" );
+            tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, deviceUtils.du(2), 0, 0, "images/menu/ic_pin.png" );
         }
         
         reporter.record("BrowserMenuOpened", actionMenuVisualState.toString());
@@ -152,9 +124,6 @@ Page
             addAction(jumpTop);
             addAction(jumpBottom);
         }
-        
-        tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "o");
-        tutorial.exec("addressBar", qsTr("Type the address of the website you wish to visit here."), HorizontalAlignment.Left, VerticalAlignment.Bottom, ui.du(10), 0, 0, ui.du(1), undefined, "r");
     }
     
     Container
@@ -196,10 +165,10 @@ Page
                         var uri = url.toString();
                         
                         if ( uri.indexOf("local://") >= 0 ) {
-                            browseAction.text = "";
-                            browseAction.requestFocus();
+                            browseAction.object.text = "";
+                            browseAction.object.requestFocus();
                         } else {
-                            browseAction.text = uri;
+                            browseAction.object.text = uri;
                         }
                     }
                     
@@ -236,7 +205,7 @@ Page
             onImageTapped: {
                 console.log("UserEvent: EnterUrlPlaceHolderTapped");
                 reporter.record("EnterUrlPlaceHolderTapped");
-                browseAction.requestFocus();
+                browseAction.object.requestFocus();
             }
         }
         
@@ -299,6 +268,22 @@ Page
                 console.log("UserEvent: JumpToBottomBrowser");
                 reporter.record("JumpToBottomBrowser");
                 scrollView.scrollToPoint(0, Infinity);
+            }
+        },
+        
+        Delegate
+        {
+            id: browseAction
+            source: 'locallyFocused' in mainContainer ? "AddressBar.qml" : "BrowseAction.qml"
+            
+            onCreationCompleted: {
+                active = true;
+            }
+            
+            onObjectChanged: {
+                if (object) {
+                    addAction(object);
+                }
             }
         }
     ]

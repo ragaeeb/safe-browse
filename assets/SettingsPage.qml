@@ -1,4 +1,4 @@
-import bb.cascades 1.3
+import bb.cascades 1.0
 import bb.system 1.2
 import bb.cascades.pickers 1.0
 import com.canadainc.data 1.0
@@ -135,8 +135,10 @@ Page
             
             function onPopTransitionEnded(page)
             {
-                if (dashPage.parent.top == dashPage) {
+                if ( tutorial.isTopPane(dashPage.parent, dashPage) )
+                {
                     helper.fetchAllBlocked(listView, modeDropDown.selectedValue);
+                    dashPage.parent.popTransitionEnded.disconnect(onPopTransitionEnded);
                 }
             }
             
@@ -148,7 +150,7 @@ Page
                     var safeRunPage = definition.createObject();
                     dashPage.parent.push(safeRunPage);
                     
-                    safeRunPage.targetPrompt.show();
+                    safeRunPage.browseField.requestFocus();
                     dashPage.parent.popTransitionEnded.connect(onPopTransitionEnded);
                 }
             }
@@ -508,9 +510,9 @@ Page
                     if ( !adm.isEmpty() )
                     {
                         if (modeDropDown.selectedValue == controlled.value) {
-                            tutorial.execBelowTitleBar( "removeException", qsTr("To remove an allowed website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), ui.du(8) );
+                            tutorial.execBelowTitleBar( "removeException", qsTr("To remove an allowed website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), deviceUtils.du(8) );
                         } else if (modeDropDown.selectedValue == passive.value) {
-                            tutorial.execBelowTitleBar( "removeBlocked", qsTr("To remove an blocked website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), ui.du(8) );
+                            tutorial.execBelowTitleBar( "removeBlocked", qsTr("To remove an blocked website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), deviceUtils.du(8) );
                         }
                     }
                 } else if (id == QueryId.InsertEntry) {
@@ -548,7 +550,7 @@ Page
                     {
                         helper.logFailedLogin(listView, password);
                         reporter.record("FailedAuthentication");
-                        persist.showToast( qsTr("Wrong password entered. Please try again."), "images/dropdown/set_password.png" );
+                        persist.showToast( qsTr("Wrong password entered. Please try again."), "images/common/dropdown/set_password.png" );
                         dashPage.parent.pop();
                     } else {
                         guardianContainer.opacity = 1;

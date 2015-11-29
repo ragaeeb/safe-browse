@@ -1,19 +1,13 @@
 import bb.cascades 1.0
 import com.canadainc.data 1.0
 
-Page
+HelpPage
 {
     id: helpPage
-    actionBarAutoHideBehavior: ActionBarAutoHideBehavior.HideOnScroll
+    videoTutorialUri: "https://youtu.be/M0rQZdmDnJE"
     
-    titleBar: AboutTitleBar
-    {
-        id: atb
-        videoTutorialUri: "http://youtu.be/Lt1SMGO2iOw"
-        
-        onClearCacheTriggered: {
-            helper.clearCache(helpPage);
-        }
+    onClearCacheTriggered: {
+        helper.clearCache(helpPage);
     }
     
     actions: [
@@ -25,12 +19,10 @@ Page
             onTriggered: {
                 console.log("UserEvent: ParentalControls");
                 reporter.record("ParentalControls");
-                persist.invokeSettingsApp();
+                persist.invokeSettingsApp("security");
             }
         }
     ]
-    
-    function cleanUp() {}
     
     function onDataLoaded(id, data)
     {
