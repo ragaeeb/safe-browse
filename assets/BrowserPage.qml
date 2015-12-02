@@ -102,7 +102,7 @@ Page
                 reporter.record("RefreshTriggered");
                 
                 if ( detailsView.url.toString() != "local:///" ) {
-                    detailsView.urlChanged(detailsView.url);
+                    webView.reload();
                 }
             }
         }
