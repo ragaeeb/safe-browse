@@ -510,9 +510,9 @@ Page
                     if ( !adm.isEmpty() )
                     {
                         if (modeDropDown.selectedValue == controlled.value) {
-                            tutorial.execBelowTitleBar( "removeException", qsTr("To remove an allowed website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), deviceUtils.du(8) );
+                            tutorial.execBelowTitleBar( "removeException", qsTr("To remove an allowed website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), tutorial.du(8) );
                         } else if (modeDropDown.selectedValue == passive.value) {
-                            tutorial.execBelowTitleBar( "removeBlocked", qsTr("To remove an blocked website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), deviceUtils.du(8) );
+                            tutorial.execBelowTitleBar( "removeBlocked", qsTr("To remove an blocked website from this list, simply tap on it and choose the '%1' action from the menu.").arg(unblockAction.title), tutorial.du(8) );
                         }
                     }
                 } else if (id == QueryId.InsertEntry) {

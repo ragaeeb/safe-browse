@@ -17,7 +17,7 @@ TabbedPane
     {
         sidebarStateChanged.disconnect(onSidebarVisualStateChanged);
 
-        tutorial.exec("tabsNew", qsTr("To browse a website in a separate tab, tap on the '%1' tab.").arg(newTab.title), HorizontalAlignment.Left, VerticalAlignment.Center, deviceUtils.du(3), 0, 0, deviceUtils.du(3) );
+        tutorial.exec("tabsNew", qsTr("To browse a website in a separate tab, tap on the '%1' tab.").arg(newTab.title), HorizontalAlignment.Left, VerticalAlignment.Center, tutorial.du(3), 0, 0, tutorial.du(3) );
 
         reporter.record( "TabbedPaneExpanded", root.sidebarVisualState.toString() );
     }
@@ -48,6 +48,7 @@ TabbedPane
                 
                 // browser page
                 tutorial.execActionBar("browserOverflow", qsTr("Tap here to open additional actions available for this page."), "x");
+                tutorial.execSwipe("addressBar", qsTr("Type the address of the website you wish to visit here."), HorizontalAlignment.Left, VerticalAlignment.Top, "r");
                 
                 if (clean) {
                     tutorial.promptVideo("https://youtu.be/M0rQZdmDnJE");

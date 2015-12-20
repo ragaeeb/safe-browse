@@ -7,7 +7,7 @@ Page
     property alias webView: detailsView
     property alias currentProgress: progressIndicator.value
     property alias totalProgress: progressIndicator.toValue
-    property alias browseField: browseAction.object
+    property alias browseField: browseAction
     property alias showPlaceHolder: placeHolder.delegateActive
     property alias webContainer: mainContainer.controls
     property alias blockerVisible: blocker.visible
@@ -21,66 +21,6 @@ Page
     }
     
     actions: [
-        ActionItem {
-            title: qsTr("Back") + Retranslate.onLanguageChanged
-            imageSource: "images/menu/ic_back.png"
-            enabled: detailsView.canGoBack
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            onEnabledChanged: {
-                if (enabled) {
-                    tutorial.exec("goBack", qsTr("Tap here to go back to the previous page."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, deviceUtils.du(19), 0, deviceUtils.du(1) );
-                }
-            }
-            
-            shortcuts: [
-                SystemShortcut
-                {
-                    type: SystemShortcuts.PreviousSection
-                    
-                    onTriggered: {
-                        reporter.record("GoBackShortcut");
-                    }
-                }
-            ]
-            
-            onTriggered: {
-                console.log("UserEvent: GoBack");
-                reporter.record("GoBack");
-                detailsView.goBack();
-            }
-        },
-        
-        ActionItem
-        {
-            title: qsTr("Forward") + Retranslate.onLanguageChanged
-            imageSource: "images/menu/ic_forward.png"
-            enabled: detailsView.canGoForward
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            onEnabledChanged: {
-                if (enabled) {
-                    tutorial.exec("goForward", qsTr("Tap here to go forward to the page you visited after the previous one."), HorizontalAlignment.Right, VerticalAlignment.Bottom, 0, deviceUtils.du(10), 0, deviceUtils.du(1) );
-                }
-            }
-            
-            shortcuts: [
-                SystemShortcut {
-                    type: SystemShortcuts.NextSection
-                    
-                    onTriggered: {
-                        reporter.record("GoForwardShortcut");
-                    }
-                }
-            ]
-            
-            onTriggered: {
-                console.log("UserEvent: GoForward");
-                reporter.record("GoForward");
-                detailsView.goForward();
-            }
-        },
-        
         ActionItem
         {
             id: refresh
@@ -102,6 +42,8 @@ Page
                 reporter.record("RefreshTriggered");
                 
                 if ( detailsView.url.toString() != "local:///" ) {
+                    detailsView.urlChanged(detailsView.url);
+                    detailsView.reload();
                     webView.reload();
                 }
             }
@@ -112,7 +54,7 @@ Page
         if (actionMenuVisualState == ActionMenuVisualState.VisibleFull)
         {
             tutorial.execOverFlow( "refresh", qsTr("Tap on the '%1' action to refresh the currently displayed page."), refresh );
-            tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, deviceUtils.du(2), 0, 0, "images/menu/ic_pin.png" );
+            tutorial.exec( "pin", qsTr("Tap on the 'Pin to Homescreen' action to go to add a shortcut to this website directly on your homescreen."), HorizontalAlignment.Right, VerticalAlignment.Center, 0, tutorial.du(2), 0, 0, "images/menu/ic_pin.png" );
         }
         
         reporter.record("BrowserMenuOpened", actionMenuVisualState.toString());
@@ -123,6 +65,113 @@ Page
         {
             addAction(jumpTop);
             addAction(jumpBottom);
+        }
+        
+        if ('Compact' in ChromeVisibility) {
+            actionBarVisibility = ChromeVisibility["Compact"];
+        }
+    }
+    
+    titleBar: TitleBar
+    {
+        kind: TitleBarKind.FreeForm
+        scrollBehavior: TitleBarScrollBehavior.Sticky
+        
+        kindProperties: FreeFormTitleBarKindProperties
+        {
+            content: Container
+            {
+                leftPadding: 5; rightPadding: 5
+                
+                layout: StackLayout {
+                    orientation: LayoutOrientation.LeftToRight
+                }
+
+                TextField
+                {
+                    id: browseAction
+                    hintText: qsTr("Enter URL...") + Retranslate.onLanguageChanged
+                    input.submitKey: SubmitKey.Submit
+                    inputMode: TextFieldInputMode.Url
+                    input.flags: TextInputFlag.AutoCapitalizationOff | TextInputFlag.AutoCorrectionOff | TextInputFlag.PredictionOff | TextInputFlag.SpellCheckOff | TextInputFlag.WordSubstitutionOff
+                    content.flags: TextContentFlag.ActiveTextOff | TextContentFlag.EmoticonsOff
+                    input.submitKeyFocusBehavior: SubmitKeyFocusBehavior.Lose
+                    verticalAlignment: VerticalAlignment.Center
+                    input.onSubmitted: {
+                        reporter.record("UrlSubmitted");
+                        
+                        var request = text.trim();
+                        if (request.length > 0)
+                        {
+                            if (request.indexOf("http://") != 0) {
+                                request = "http://" + request;
+                            }
+                            
+                            detailsView.url = request;
+                        }
+                    }
+                    
+                    onTextChanging: {
+                        showPlaceHolder = false;
+                    }
+                    
+                    layoutProperties: StackLayoutProperties {
+                        spaceQuota: 0.9
+                    }
+                }
+                
+                ImageButton
+                {
+                    horizontalAlignment: HorizontalAlignment.Right
+                    defaultImageSource: "images/menu/ic_back.png"
+                    pressedImageSource: "images/menu/ic_back_pressed.png"
+                    disabledImageSource: "images/menu/ic_back_disabled.png"
+                    verticalAlignment: VerticalAlignment.Center
+                    enabled: detailsView.canGoBack
+                    
+                    layoutProperties: StackLayoutProperties {
+                        spaceQuota: 0.05
+                    }
+                    
+                    onEnabledChanged: {
+                        if (enabled) {
+                            tutorial.exec("goBack", qsTr("Tap here to go back to the previous page."), HorizontalAlignment.Right, VerticalAlignment.Top, 0, tutorial.du(8), 0, tutorial.du(1) );
+                        }
+                    }
+                    
+                    onClicked: {
+                        console.log("UserEvent: GoBack");
+                        reporter.record("GoBack");
+                        detailsView.goBack();
+                    }
+                }
+                
+                ImageButton
+                {
+                    horizontalAlignment: HorizontalAlignment.Right
+                    defaultImageSource: "images/menu/ic_forward.png"
+                    pressedImageSource: "images/menu/ic_forward_pressed.png"
+                    disabledImageSource: "images/menu/ic_forward_disabled.png"
+                    verticalAlignment: VerticalAlignment.Center
+                    enabled: detailsView.canGoForward
+                    
+                    layoutProperties: StackLayoutProperties {
+                        spaceQuota: 0.05
+                    }
+                    
+                    onEnabledChanged: {
+                        if (enabled) {
+                            tutorial.exec("goForward", qsTr("Tap here to go forward to the page you visited after the previous one."), HorizontalAlignment.Right, VerticalAlignment.Top, 0, tutorial.du(2), 0, tutorial.du(1) );
+                        }
+                    }
+                    
+                    onClicked: {
+                        console.log("UserEvent: GoForward");
+                        reporter.record("GoForward");
+                        detailsView.goForward();
+                    }
+                }
+            }
         }
     }
     
@@ -165,10 +214,10 @@ Page
                         var uri = url.toString();
                         
                         if ( uri.indexOf("local://") >= 0 ) {
-                            browseAction.object.text = "";
-                            browseAction.object.requestFocus();
+                            browseAction.text = "";
+                            browseAction.requestFocus();
                         } else {
-                            browseAction.object.text = uri;
+                            browseAction.text = uri;
                         }
                     }
                     
@@ -205,7 +254,7 @@ Page
             onImageTapped: {
                 console.log("UserEvent: EnterUrlPlaceHolderTapped");
                 reporter.record("EnterUrlPlaceHolderTapped");
-                browseAction.object.requestFocus();
+                browseAction.requestFocus();
             }
         }
         
@@ -268,22 +317,6 @@ Page
                 console.log("UserEvent: JumpToBottomBrowser");
                 reporter.record("JumpToBottomBrowser");
                 scrollView.scrollToPoint(0, Infinity);
-            }
-        },
-        
-        Delegate
-        {
-            id: browseAction
-            source: 'locallyFocused' in mainContainer ? "AddressBar.qml" : "BrowseAction.qml"
-            
-            onCreationCompleted: {
-                active = true;
-            }
-            
-            onObjectChanged: {
-                if (object) {
-                    addAction(object);
-                }
             }
         }
     ]
