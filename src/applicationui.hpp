@@ -7,6 +7,7 @@
 #include "QueryHelper.h"
 
 #include <bb/system/LocaleHandler>
+#include <bb/utility/i18n/CustomDateFormatter>
 
 namespace safebrowse {
 
@@ -21,6 +22,7 @@ class ApplicationUI : public QObject
 	QueryHelper m_helper;
 	bb::system::LocaleHandler m_timeRender;
 	InvokeHelper m_invoke;
+	bb::utility::i18n::CustomDateFormatter m_dateFormatter;
 
     void init(QString const& qml);
     void processInvoke();

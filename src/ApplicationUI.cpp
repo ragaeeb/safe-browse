@@ -14,7 +14,8 @@ using namespace canadainc;
 
 ApplicationUI::ApplicationUI(bb::system::InvokeManager* im) :
         m_persistance(im), m_account(&m_persistance),
-        m_helper(&m_persistance), m_invoke(&m_persistance)
+        m_helper(&m_persistance), m_invoke(&m_persistance),
+        m_dateFormatter("MMMd")
 {
     switch ( im->startupMode() )
     {
@@ -116,8 +117,13 @@ void ApplicationUI::addToHomeScreen(QString const& label, QUrl const& url, QStri
 
 QString ApplicationUI::renderStandardTime(QDateTime const& theTime)
 {
-    static QString format = bb::utility::i18n::timeFormat(bb::utility::i18n::DateFormat::Short);
-    return m_timeRender.locale().toString(theTime, format);
+    if ( theTime.daysTo( QDateTime::currentDateTime() ) == 0 )
+    {
+        static QString format = bb::utility::i18n::timeFormat(bb::utility::i18n::DateFormat::Short);
+        return m_timeRender.locale().toString(theTime, format);
+    } else {
+        return m_dateFormatter.format(theTime);
+    }
 }
 
 
