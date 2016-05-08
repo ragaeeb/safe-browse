@@ -1,3 +1,4 @@
+import QtQuick 1.0
 import bb.cascades 1.2
 
 Page
@@ -193,6 +194,15 @@ Page
             scrollViewProperties.initialScalingMethod: ScalingMethod.AspectFill
             scrollRole: ScrollRole.Main
             
+            onTouch: {
+                if ( event.isDown() ) {
+                    titleBar.visibility = ChromeVisibility.Hidden;
+                    browsePage.actionBarVisibility = ChromeVisibility.Hidden;
+                } else if ( event.isUp() || event.isCancel() ) {
+                    timer.restart();
+                }
+            }
+            
             Container
             {
                 horizontalAlignment: HorizontalAlignment.Fill
@@ -317,6 +327,17 @@ Page
                 console.log("UserEvent: JumpToBottomBrowser");
                 reporter.record("JumpToBottomBrowser");
                 scrollView.scrollToPoint(0, Infinity);
+            }
+        },
+        
+        Timer {
+            id: timer
+            repeat: false
+            interval: 2000
+            
+            onTriggered: {
+                titleBar.visibility = ChromeVisibility.Default;
+                browsePage.actionBarVisibility = ChromeVisibility.Default;
             }
         }
     ]
